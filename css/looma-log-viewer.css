@@ -1,0 +1,246 @@
+/* ============================================================
+   /activity page (Looma Log Viewer)
+   Layout:
+     title bar             (full width across the top)
+     [ workspace ][ views ]  workspace on left, view buttons stacked on right
+     control bar           (full width at the bottom)
+   The yellow Looma toolbar lives in row 10 of the body grid — we just
+   fill row 1-9 (#main-container-horizontal) and let it handle its row.
+   ============================================================ */
+
+#main-container-horizontal {
+    background-color: var(--looma-background);
+    color: #15233a;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2vh 2vw;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+#fullscreen {
+    background-color: #ffffff;
+    width: min(96vw, 1400px);
+    max-width: 100%;
+    height: 100%;
+    max-height: 100%;
+    border-radius: 14px;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+    padding: 16px 24px 20px 24px;
+    box-sizing: border-box;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+        "title    title"
+        "chart    views"
+        "controls controls";
+    gap: 14px 18px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* ----- Title (full top row) ----- */
+h2#title {
+    grid-area: title;
+    margin: 0;
+    color: var(--looma-blue, #091F48);
+    font-size: clamp(18px, 2.2vw, 26px);
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    text-align: center;
+}
+
+/* ----- View tabs (right column, stacked vertically, icon-only) ----- */
+#views {
+    grid-area: views;
+    position: static;
+    top: auto;
+    right: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+    justify-content: flex-start;
+    align-self: start;
+    width: 80px;
+}
+
+#views button {
+    height: 80px;
+    width: 100%;
+    padding: 0;
+    background-color: #f1f4fb;
+    background-repeat: no-repeat;
+    background-position: center;
+    border: 1px solid #d6dceb;
+    border-radius: 10px;
+    color: transparent;          /* hide tooltip span text — icon-only */
+    font-size: 0;
+    margin: 0;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+#views #line {
+    background-image: url("../images/activity.png");
+    background-size: 55%;
+}
+#views #bar {
+    background-image: url("../images/barchart.jpg");
+    background-size: 55%;
+}
+#views #map {
+    background-image: url("../images/map-marker.png");
+    background-size: 38%;
+}
+
+#views button:hover {
+    background-color: #e4ebfa;
+    border-color: #b2bedb;
+}
+
+#views button.active {
+    background-color: var(--looma-blue, #091F48);
+    border-color: var(--looma-blue, #091F48);
+}
+
+#views button.active:hover {
+    background-color: #122a5a;
+}
+
+/* ----- Workspace (the chart canvas container) ----- */
+#workspace {
+    grid-area: chart;
+    position: relative;
+    background: #fafbfd;
+    border: 1px solid #e4e7ef;
+    border-radius: 10px;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+}
+
+/* Each canvas fills the workspace exactly. Chart.js reads the canvas
+   parent's clientWidth/clientHeight to size itself; with `inset: 0` and
+   workspace `overflow: hidden`, the rendered chart stays inside the box. */
+#linechart,
+#barchart,
+#mapchart {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    display: block;
+}
+
+/* Hide the other canvases at first paint — JS toggles visibility once it
+   wires up the active chart. */
+#barchart, #mapchart { display: none; }
+
+/* ----- Control bars (full bottom row) ----- */
+#linecontrols,
+#barcontrols,
+#mapcontrols {
+    grid-area: controls;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px 18px;
+    padding: 0;
+}
+
+#linecontrols label,
+#barcontrols label,
+#mapcontrols label {
+    color: #15233a;
+    font-size: 14px;
+    margin-right: 14px;
+    cursor: pointer;
+}
+
+#linecontrols input[type="radio"],
+#barcontrols input[type="radio"],
+#mapcontrols input[type="radio"] {
+    margin: 0 4px 0 0;
+    cursor: pointer;
+    transform: scale(1.05);
+    accent-color: var(--looma-blue, #091F48);
+}
+
+#linecontrols > span {
+    margin-left: 12px;
+    display: inline-flex;
+    gap: 8px;
+}
+
+button#prev,
+button#next {
+    margin: 0;
+    background-color: #ffffff;
+    border: 1px solid #c8d0e3;
+    border-radius: 6px;
+    padding: 6px 14px;
+    color: var(--looma-blue, #091F48);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+button#prev:hover:not(:disabled),
+button#next:hover:not(:disabled) {
+    background-color: #f1f4fb;
+    border-color: #9faecf;
+}
+
+button#prev:disabled,
+button#next:disabled {
+    color: #b6bccd;
+    border-color: #e4e7ef;
+    cursor: not-allowed;
+}
+
+#piecontrols { display: none; }
+
+/* ----- Narrow screens: collapse the right column under the chart ----- */
+@media (max-width: 720px) {
+    #fullscreen {
+        padding: 14px 14px 18px 14px;
+        gap: 10px 10px;
+        border-radius: 10px;
+        grid-template-rows: auto auto 1fr auto;
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "title"
+            "views"
+            "chart"
+            "controls";
+    }
+    #views {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        width: auto;
+    }
+    #views button {
+        width: 64px;
+        height: 64px;
+    }
+    h2#title {
+        font-size: 16px;
+    }
+    #linecontrols,
+    #barcontrols,
+    #mapcontrols {
+        gap: 6px 10px;
+    }
+    #linecontrols > span {
+        margin-left: 0;
+        width: 100%;
+        justify-content: center;
+    }
+}

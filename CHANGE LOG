@@ -1,0 +1,100 @@
+CHANGE LOG FOR LOOMA
+
+2026 02
+- version 7.20
+- 335 new resources
+- 900 new resource to chapter assignments (6,7,8 grades)
+- added "speak" button to "teacher aids" page
+- 137 new games from SPSH II Lots 1,2
+- 97 new games from WRP II Lot 5,6,7
+- 283 new games from WRP II 8,9,10,11 and SPHS II Lots 3
+- 23 new games and 140 resources from SPHS II Lots 4,5,6,7
+- added "play-captions" field to video activities in mongo [for videos that dont have voice track]
+
+2025 11
+- version 7.19
+- added new partner logos to info page
+- removed "dictionary images" thumbnails - not used, saves 32MB
+- fixed text-selection, word lookup and TTS in looma lesson player
+- fixed PDF toolbar in lesson player to match regular Looma PDF player
+- added video captions ON/OFF button in video player
+- added resources from RBS and LTC
+- modified/extended metadata from RBS and LTC
+
+2025 09
+- version 7.18
+- fixed PDF play in lesson player and lesson editor
+    - PDF toolbar shows in any PDF display, and when in 'fullscreen'
+- 675 new resources to chapter assignments for ePaath, khan, Dr Dann and TED
+- fixed bug in text-to-speech
+
+2025 08
+- teacher guides converted to unicode
+- looma reverse SSH server "info" command shows disk space on the remote
+- 'loomaupdate' script deletes browser cache
+- piper TTS [english and nepali]
+
+2025 07 23
+- removed math practice exercises
+
+2025 07 17 version 7.17c
+- fixed TTS bugs
+
+2025 06 20 Version 7.17
+- added 'piper' TTS including Nepali TTS
+- added video captions in English and Nepali
+- translated all lessons to Nepali [except EN and N lessons]
+- removed Library > Textbooks folder to save space
+- added Library > Curriculum to include CDC "curriculum" memos
+-     removed old CDC Curricula PDFs as obsolete
+- added actual textbook covers to home page
+++++++++++++++++++++++++++++++++++++++++++++++
+2025 06 06 Version 7.16
+
+- completed full set of Teacher Guides
+- added Nepali Listening Files for English chapters
+- re-organized English Listening Files
+
+++++++++++++++++++++++++++++++++++++++++++++++
+2025 05 12 Version 7.15
+
+- changes to looma-utilities.js, looma-search.js, looma-library.php, looma-library.js,
+    looma-library.css, looma-history.js, looma-book.php
+    to fix unnecessary extra calls to backend db in search and library when doing makeActivityButton()
+
+    to make chapters appear as looma-search results
+
+- add limits to PDF viewer zoom control (- 35%, + 200%)
+
+++++++++++++++++++++++++++++++++++++++++++++++
+2025 04 30  Version 7.14
+
+- adding Teacher Aids to Chapter Resources
+    AI generated summary, outline, plan, key words and quiz files in content/chapters folder
+    if the files are present, buttons show when Teacher Aids [on the Resources page of a chapter] is clicked
+
+- loaded preliminary set of Teacher Aids to all chapters - needs to be checked
+
+- all videos have EN and NP captions
+
+- changes suggested by Bandipur schools and Dinesh
+    show IP adddress on toolbar
+    remove CEHRD logo on toolbar
+    show system info on INFO larger
+
+- changes suggested by Kabindra
+    verbose output from 'loomaupdate'
+    conform audio/mute icon to YouTube style
+    "More Results" button on Library Search display
+    remove CEHRD logo, add IP address to Toolbar
+++++++++++++++++++++++++++++++++++++++++++++++
+7.10
+- 500+ RBS resources attached to chapters
+- 75 lessons attached to chapters
+- Paisley (PCV): vocab games for all 4EN chapters
+- Natali (PCV): vocab games for all 7EN chapters, and corrected time limit for all games
+- all textbooks are re-scanned to unicode
+- matching games can have >5 questions (no limit)
+- onscreen keyboard for ePaath
+- dictionary includes ALL words in all chapters
+	- dictionary words tagged with the 1st chapter, by subject, they appear in

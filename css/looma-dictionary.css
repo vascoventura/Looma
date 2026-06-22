@@ -1,0 +1,227 @@
+#main-container-horizontal {
+    margin:0;
+}
+
+button.speak {
+    display:inline-block;
+    bottom:33vh;
+}
+
+button.looma-control-button.speak.tts-busy {
+    transform: scale(1.2) !important;
+    transform-origin: center center !important;
+    border: 0.22em solid #ffd400 !important;
+    outline: 0.18em solid #ffd400 !important;
+    outline-offset: 0.08em !important;
+    box-shadow: 0 0 1em rgba(255, 212, 0, 0.95) !important;
+    animation: ttsSpeakPulse 0.9s ease-in-out infinite;
+    pointer-events: none !important;
+}
+
+button#fullscreen-control {
+    display:inline-block;
+    bottom: 17vh;
+}
+
+button.show-keyboard {
+    display:inline-block;
+    /* Slots tightly above Speak (33vh, edge 45vh). The Assistant is placed
+       dynamically by looma-assistant-button.js ON TOP of the column, so the
+       order from bottom up is: Fullscreen, Speak, Keyboard, Assistant. */
+    bottom: 46vh;
+}
+
+h2 {
+    text-align:center;
+    font-size: 25px;
+    background-color: aquamarine;
+    background-color: var(--looma-toolbar);
+    color:black;
+    padding: 10px;
+}
+p {
+    font-size: 1em;
+    text-align:center;
+}
+form {
+    text-align: center;
+    height: 10vh;
+    vertical-align:middle;
+    font-size : 2em;
+    background-color:var(--looma-toolbar);
+    color:black;
+    padding-top: 8px;
+}
+
+input#input {
+    border-radius: 6px;
+    margin: auto 0;
+    font-size:1em;
+}
+
+button#submit {
+    margin:auto 0;
+    font-size: 4vh;
+}
+
+#english{
+    text-align: center;
+    font-size: 11vh;
+    font-weight:bolder;
+}
+
+#nepali{
+    text-align: center;
+    font-size: 11vh;
+    font-weight:bolder;
+}
+#definitionDisplay{
+    text-align: center;
+    font-size: 3em;
+    font-weight:bolder;
+}
+
+#definition.largeWord { font-size:7vh;}
+#definition.largeWord { font-size:7vh;}
+#definition.largeWord { font-size:7vh;}
+
+/* Online-fallback definition: shown when a word is missing from Looma's own
+   dictionary and a definition is fetched from the internet in the background.
+   Kept much smaller than the main (3em, bold) definition text. */
+#online-definition {
+    margin: 18px auto 0;
+    max-width: 80%;
+    font-size: 0.7em;
+    font-weight: normal;
+    line-height: 1.4;
+    color: #333;
+}
+#online-definition.online-pending,
+#online-definition.online-none {
+    font-style: italic;
+    color: #888;
+}
+
+#rootWord{
+    text-align: center;
+    font-size: 1em;
+    font-weight:bolder;
+}
+
+#rwNepali{
+    text-align: center;
+    font-size: 1.5em;
+    font-weight:bolder;
+}
+#rwDefinition{
+    text-align: center;
+    font-size: 1em;
+    font-weight:bolder;
+}
+
+#definitionThumb {
+    top: 30vh;
+    left:10vw;
+    position: absolute;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+    max-height: 20vh;
+    max-width: 30vw;
+}
+
+#image:hover {opacity: 0.7;}
+
+/* The Modal (background) */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    padding-top: 100px; /* Location of the box */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.9); /* Black w/ opacity */
+}
+
+/* Modal Content (image) */
+.modal-content {
+    margin: auto;
+    display: block;
+    max-width: 80%;
+    max-height: 80%;
+}
+
+/* Caption of Modal Image */
+#caption {
+    margin: auto;
+    display: block;
+    width: 80%;
+    max-width: 700px;
+    text-align: center;
+    color: #ccc;
+    padding: 10px 0;
+    height: 150px;
+}
+
+/* Add Animation */
+.modal-content, #caption {
+    -webkit-animation-name: zoom;
+    -webkit-animation-duration: 0.6s;
+    animation-name: zoom;
+    animation-duration: 0.6s;
+}
+
+@-webkit-keyframes zoom {
+    from {-webkit-transform: scale(0)}
+    to {-webkit-transform: scale(1)}
+}
+
+@keyframes zoom {
+    from {transform: scale(0.1)}
+    to {transform: scale(1)}
+}
+
+/* The Close Button */
+.close {
+    position: absolute;
+    top: 15px;
+    right: 35px;
+    color: #f1f1f1;
+    font-size: 100px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.close:hover,
+.close:focus {
+    color: #bbb;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+
+.native-keyword {
+    display:inline;
+}
+
+@media screen and (max-device-height: 480px) and (orientation:landscape) , screen and (max-device-width:480px) and (orientation:portrait) {
+    h2.title { font-size: 4em; }
+    form {font-size:1.4em;}
+    #definitionDisplay { font-size: 1.7em;}
+    #definitionThumb {
+        top: 40vh;
+        left: 0;
+    }
+    
+    button.speak { bottom:32vh; }
+    /* Slots tightly above Speak (32vh, edge 44vh); Assistant lands on top. */
+    button.show-keyboard {bottom:45vh;}
+
+    .modal-content {width: 100%;}
+}

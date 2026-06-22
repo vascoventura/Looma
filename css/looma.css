@@ -1,0 +1,1068 @@
+/*
+    NOTE: suggested CSS resets that we could try
+
+    html, body, div, span, object, iframe,
+    h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+    abbr, address, cite, code,
+    del, dfn, em, img, ins, kbd, q, samp,
+    small, strong, sub, sup, var,
+    b, i,
+    dl, dt, dd, ol, ul, li,
+    fieldset, form, label, legend,
+    table, caption, tbody, tfoot, thead, tr, th, td,
+    article, aside, canvas, details, figcaption, figure,
+    footer, header, hgroup, menu, nav, section, summary,
+    time, mark, audio, video {
+      margin: 0;
+      padding: 0;
+      border: 0;
+      outline: 0;
+      font-size: 100%;
+      vertical-align: baseline;
+      background: transparent;
+    }
+
+    body {
+      line-height: 1;
+    }
+
+ */
+
+html {
+
+    --looma-phone-width:667;
+
+    --looma-green: #29aa29;  /*green  = 063006 for TEST Looma */
+    --looma-purple:#800080;  /*purple = 800080 for INDIA Looma */
+    --looma-blue:#091F48;    /* Looma blue = 091F48 for regular Looma */
+    /* NOTE: looma-blue in Pantone is "2768 C" */
+    --looma-background: var(--looma-blue);
+    --looma-toolbar:yellow;
+    --looma-font-color:yellow;
+    --looma-button-background:white;
+    --looma-button-font-color:black;
+
+    --looma-button-hover-background:white;
+    --looma-button-hover-font-color:black;
+
+    --looma-button-active-background:var(--looma-background);
+    --looma-button-active-font-color:var(--looma-font-color);
+
+    --looma-scrollbar-track:lightgoldenrodyellow;
+    background-color: white;
+    height:100vh;
+    width:100vw;
+    position:relative;
+    margin:0;
+    padding:0;
+}
+
+::placeholder {color:red;font-style:italic;
+}
+
+a {
+    text-decoration:none;
+    /*color:blue;*/
+    color:black;
+}
+
+body {
+    box-sizing: border-box;
+    position: relative;
+	margin:0;
+	padding:0;
+    height:100vh;
+    width:100vw;
+
+    font-family: "Comic Neue", "Comic Sans MS", "Chalkboard", "Noteworthy",sans-serif;
+
+    background-color: var(--looma-background);
+    color: var(--looma-font-color);
+
+	overflow: hidden;
+	text-align: center;
+    word-wrap:break-word;
+}
+
+body {
+     display:grid;
+     grid-template-rows:    [top]  repeat(9, 1fr) [toolbar] 1fr [bottom];
+     grid-template-columns: [left] repeat(16, 1fr)[toolbar] 1fr [right];
+ }
+
+body * {
+    user-drag:none;
+    -webkit-user-drag:none;
+    font-family:inherit;
+}
+
+#fullscreen {
+    background-color: var(--looma-background);
+}
+
+#main-container-horizontal {
+    grid-row:    top / toolbar;
+    grid-column: left / right;
+    max-height:100%;
+ /*   overflow:hidden; */
+    position:relative;
+    text-align: center;
+    margin:0;}
+
+#main-container-vertical {
+    grid-row:    top / bottom;
+    grid-column: left / toolbar;
+    overflow:hidden;
+    text-align: center;
+}
+
+#toolbar-container {
+    grid-row:    toolbar / bottom;
+    grid-column: left / right;
+}
+
+#toolbar-container-vertical {
+    grid-row:    top / bottom;
+    grid-column: toolbar / right;
+ }
+
+#main-container {
+	width:100%;
+	height:100%;
+	overflow:hidden;
+	position:absolute;
+	text-align: center;
+	top:0;
+	left:0;
+	margin:auto;
+}
+
+/*
+#main-container.scroll            { overflow:auto; }
+#main-container-horizontal.scroll { overflow:auto;}
+#main-container-vertical.scroll   { overflow:auto; }
+*/
+
+.scroll {
+    overflow:auto;
+    scrollbar-width:auto;
+}
+
+::-webkit-scrollbar-track-piece {
+   background: var(--looma-scrollbar-track); /*light blue*/
+}
+::-webkit-scrollbar-thumb {
+    -webkit-box-shadow: inset 0 0 10px rgba(0,0,0,0.75);
+    -webkit-border-radius: 35px;
+    border-radius: 35px;
+    background: -webkit-linear-gradient(left, #ffffff, #dfdfdf, #cecece);
+}
+::-webkit-scrollbar { width:40px;}
+
+::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+    border-radius: 35px;
+}
+
+h1, h3, h3, button, #looma-logo-div, #partner-logo-div, #CEHRD-logo-div {
+    user-select:none;
+    -webkit-user-select: none;
+
+}
+
+h1.title, h2.title, h3.title {
+    font-weight:bold !important;
+	margin:auto;
+	text-align:center
+}
+h1.title {font-size:4em;}
+h2.title {font-size:3em;}
+h3.title {font-size:2em;}
+
+.title h1{
+    font-size:4em;
+    margin-top:3vh;
+    margin-bottom:5vh;
+}
+
+h1 span, h2 span, h3 span {
+    display:inline-block;
+    user-select: none;
+    -webkit-user-select: none;
+
+}
+
+.credit{
+    text-align: right;
+    margin-right:5px;
+    font-size: 10px;
+    line-height: 12px;
+    user-select:none;
+    -webkit-user-select: none;
+
+    position: fixed;
+    right:3vw;
+    bottom:10vh;
+    width:25vw;
+}
+/* UNKNOWN
+#amazon {width:10px;}
+#amazon img {height:4vh;width:5vw;}
+*/
+
+div.viewer {
+	width:100%;
+	height:100%;
+	overflow:hidden;
+}
+
+div.viewer img {
+	margin: 0 auto;
+	max-width: 100%;
+	height: 100%;
+}
+
+input, select {
+    color:black;
+    background-color:white;
+}
+
+input[type="range"] {
+	display: inline;
+	width:50%;
+}
+
+/*    the following TABLE styling should probably be in looma-home.css and others (library, histories, games ??) */
+
+table {
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    border-collapse: separate;
+    border-spacing: 15px;
+    table-layout: fixed;
+}
+
+table#dir-table {
+    height:0;
+    max-height:30%;
+}
+
+table#file-table, table#lesson-table {
+    height:0;
+}
+
+th, td {
+    width: 30%;
+    max-width:30%;
+    overflow: hidden;
+    text-align: center;
+    padding: 4px 5px;
+}
+
+th {
+    max-height:50px;
+}
+
+td button, th button {
+    font-size: 1.5em;
+    width:90%;
+    height:100%;
+    margin: 5px;
+    overflow:hidden;
+}
+
+button img#flag {height: 100%;}
+
+/*------------------------*/
+/* BUTTON styling here. "button" defines color, background and font. "button.classname" defines sizes (height, width, font-size, etc)*/
+/*------------------------*/
+
+button {
+	background-color:var(--looma-button-background);
+	color:var(--looma-button-font-color);
+	border-color: #FFFFFF;
+	border: 5px;
+	border-radius: 5px;
+
+
+	display:inline-block;
+	height:80%;
+
+	overflow: hidden;
+    /*vertical-align:middle;*/
+	text-align:center;
+}
+
+button:hover {
+	color: var(--looma-button-hover-font-color);
+	background-color:var(--looma-button-hover-background);
+	border-color: yellow;
+    border-width:4px;
+	/*transform: scale(1.5,1.5);*/
+}
+
+button.active {
+    color:            var(--looma-button-active-font-color);
+    background-color: var(--looma-button-active-background);
+    border:2px solid yellow;
+}
+
+button#back-button {
+	    background-image: url("../images/back-arrow.png");
+	    background-size: 80% 80%;
+	    background-repeat: no-repeat;
+	    background-color: transparent;
+	    position:absolute;
+	    right:3%;
+	    bottom:12%;
+	    height:8%;
+	    width:7%;
+	    border:none;
+	    box-shadow: none;
+	    z-index:1000;
+	    cursor: pointer;
+}
+
+.little {
+	font-size:0.35em;
+	line-height:1em;
+	padding:0;
+	margin:0;
+}
+
+/* for slideshow
+
+button.with-play {
+    float:left;
+    width:20%;
+}
+
+button.with-play.img img {
+    width: 100%;
+    color: red;
+    display: inline;
+}
+
+button.beside-play {
+    display: inline;
+    width:70%;
+}
+ */
+
+/* following should be in TOOLBAR.CSS  ????   */
+#padlock {
+    position:absolute;
+    right:1vw;
+    bottom:6vh;
+    height:3vh;
+    width: 3vh;
+}
+
+#login-id {
+        position:absolute;
+        display:none;
+        right:1vw;
+        bottom:5vh;
+        color:red;
+        font-size: 0.8em;
+}
+
+span#datetime {
+	margin:0 0 5px 0 ;
+	display:inline-block;
+	color: #000;
+}
+
+img.looma-logo.native-keyword {display:none;}
+
+
+/* UNKNOWN
+button.navigate {
+	width:25vw;
+	font-size: 4em;
+}
+*/
+
+/*****************
+ * 'xlat' and 'tip' classes are tooltip popups
+ *
+ * "xlat" on hover shows a translation of the <span> in the upper right (fixed) of the screen
+ *
+ * "tip" on hover shows a small tooltip for a button (like a Looma toolbar button) giving the text name for the button's icon
+ ********************/
+h1 span.english-keyword, h1 span.native-keyword {
+    display:inline-block;
+}
+
+.xlat {display:none;}
+
+span:hover .xlat {
+    display:block;
+    position:fixed;
+    top:20px;
+    right:15px;
+    z-index: 1000;
+    border: 1px solid #000000;
+    border-radius: 3px;
+    background-color:#FAFCAC;
+    font-size: 1em;
+    color:#000000;}
+
+span.tip { display:none;}
+
+button.hidden {display:none;}  /*used in looma-wikipedia.php*/
+
+button:hover span.tip.yes-show 	{
+    position:absolute;
+    display:block;
+   bottom: 100%;
+   left: 50%;
+   transform: translateX(-50%) translateY(-8px);
+   margin:auto;
+
+    font-size: 1.8em;
+    font-weight: bold;
+    padding: 12px 16px;
+    white-space: nowrap;
+    min-width: 120px;
+
+    z-index: 10000;
+    border: 2px solid #000000;
+    border-radius: 8px;
+    background-color: #FFE44D;
+    color:#000000;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);}
+
+button:hover span.tip.yes-show.big-show {
+
+    display:block;
+
+    font-size:1.8em;
+    font-weight: bold;
+    padding: 12px 16px;
+    white-space: nowrap;
+    left:auto;
+    width:auto;
+    min-width: 140px;
+}
+
+/*****************
+ * buttons of class 'speak' and 'lookup' and 'show-keyboard' and id "fullscreen-control" can be placed on any page
+ * they are 'fixed' on the page and semi-transparent
+ *
+ * they are all class="looma-control-button" to get their common CSS
+ ********************/
+button.looma-control-button {
+    position: fixed;
+    right:5vw;
+    display:none;
+    opacity: 0.5;
+    z-index: 1000;
+    height: 12vh;
+    width:  12vh;
+    background-repeat: no-repeat;
+    background-position: center;
+    box-shadow:none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+button.looma-control-button:hover {
+    opacity: 1;
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+button#fullscreen-control {
+    bottom:11vh;
+    display:none;
+    z-index:2147483647; /*this is 2^31-1 which is the z-index browsers use for FULLSCREEN */
+    background-image: url("../images/fullscreen2.png");
+    background-size: 100% 100%;
+    background-color:rgba(200,200,200,0.7);  /*transparent light gray*/
+    cursor: pointer;
+}
+
+button#fullscreen-control:hover {
+    opacity: 1;
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+button.speak {
+    bottom:22vh;
+    display:none;
+    background-image: url("../images/speech1.png");  /* speech-bubble icon — TTS (formerly Assistant) */
+    background-size: 85% 85%;
+    background-color:rgba(200,200,200,0.7); /* transparent light gray*/
+    border: 0.2em solid transparent;
+    box-sizing: border-box;
+    position: fixed;
+    transition: transform 0.18s ease, opacity 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+    cursor: pointer;
+}
+
+button.looma-assistant {
+    /* Top of the floating control-button column — NOT the top of the page.
+       looma-assistant-button.js refines this so it lands one slot above the
+       topmost control button the current page shows. No `top` here: a fixed
+       element with both top and bottom set would ignore the JS `bottom`. */
+    bottom: 55vh;
+    display:none;
+    background-image: url("../images/chat-assistant.svg");  /* chat bubble with dots icon — Looma Assistant chat */
+    background-size: 85% 85%;
+    background-color:rgba(200,200,200,0.7); /* transparent light gray*/
+    border: 0.2em solid transparent;
+    box-sizing: border-box;
+    position: fixed;
+    transition: transform 0.18s ease, opacity 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+    z-index: 1050;
+}
+
+button.looma-control-button.speak:not(.tts-disabled):not(.tts-busy):hover,
+button.looma-control-button.speak.tts-pending {
+    /* Pending reuses the hover look so the user sees the click was accepted before audio starts. */
+    color: var(--looma-button-hover-font-color);
+    border-color: yellow;
+    border-width: 4px;
+    opacity: 1;
+    transform: scale(1.15);
+    box-shadow: 0 4px 12px rgba(255,212,0,0.6);
+}
+
+button.looma-control-button.lookup:hover,
+button.looma-control-button.captions:hover,
+button.looma-control-button.download:hover {
+    border-color: yellow;
+    border-width: 4px;
+    opacity: 1;
+    transform: scale(1.15);
+    box-shadow: 0 4px 12px rgba(255,212,0,0.6);
+}
+
+button.looma-control-button.speak.tts-pending::after {
+    /* Spinner shown only while audio is being fetched/generated. */
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 38%;
+    height: 38%;
+    margin-left: -19%;
+    margin-top: -19%;
+    border-radius: 50%;
+    border: 0.22em solid rgba(255, 255, 0, 0.3);
+    border-top-color: rgba(255, 212, 0, 1);
+    border-right-color: rgba(255, 212, 0, 0.85);
+    box-sizing: border-box;
+    animation: ttsPendingSpin 0.8s linear infinite;
+    pointer-events: none;
+}
+
+button.looma-control-button.speak.tts-busy {
+    /* Busy styling tracks active playback: larger button plus yellow outline while audio is sounding. */
+    transform: scale(1.2) !important;
+    transform-origin: center center !important;
+    opacity: 1 !important;
+    border: 0.22em solid #ffd400 !important;
+    outline: 0.18em solid #ffd400 !important;
+    outline-offset: 0.08em !important;
+    box-shadow: 0 0 1em rgba(255, 212, 0, 0.95) !important;
+    animation: ttsSpeakPulse 0.9s ease-in-out infinite;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+button.speak.tts-disabled {
+    opacity: 0.35 !important;
+    filter: grayscale(1);
+    background-color: rgba(120,120,120,0.85);
+    border-color: rgba(150,150,150,0.65);
+    box-shadow: none;
+    pointer-events: none;
+}
+
+button.looma-control-button.looma-assistant:hover {
+    color: var(--looma-button-hover-font-color);
+    border-color: yellow;
+    border-width: 4px;
+    opacity: 1;
+    transform: scale(1.15);
+    box-shadow: 0 4px 12px rgba(255,212,0,0.6);
+}
+
+/* ---------------------------------------------------------------------------
+ * Fullscreen — compact control-button sidebar
+ *
+ * Outside fullscreen the Speak / Lookup / Assistant / Keyboard / Fullscreen
+ * controls float over the page at right:5vw, 12vh wide, 0.5 opacity. In
+ * fullscreen (PDF book, dictionary, history pages, ...) that column looked
+ * untidy and sat over the page's scrollbar. Here it is docked into a compact,
+ * fully-opaque column just inside the right edge — clear of the scrollbar.
+ * `:fullscreen` matches the fullscreened element (#fullscreen / #video-
+ * fullscreen, which the control buttons live inside), so this works on every
+ * content page without per-page CSS. The :-webkit-full-screen copy is kept as
+ * a separate rule so an unknown pseudo-class can't drop the whole block.
+ * ------------------------------------------------------------------------- */
+:fullscreen button.looma-control-button {
+    right: 22px;            /* just inside a typical page scrollbar */
+    width: 8.5vh;
+    height: 8.5vh;
+    opacity: 1;
+    border: 2px solid rgba(0, 0, 0, 0.55);
+    box-shadow: -3px 0 12px rgba(0, 0, 0, 0.40);
+}
+:-webkit-full-screen button.looma-control-button {
+    right: 22px;
+    width: 8.5vh;
+    height: 8.5vh;
+    opacity: 1;
+    border: 2px solid rgba(0, 0, 0, 0.55);
+    box-shadow: -3px 0 12px rgba(0, 0, 0, 0.40);
+}
+
+/* The Fullscreen button carries an id, so match it explicitly to win specificity. */
+:fullscreen button#fullscreen-control {
+    right: 22px;
+    width: 8.5vh;
+    height: 8.5vh;
+}
+:-webkit-full-screen button#fullscreen-control {
+    right: 22px;
+    width: 8.5vh;
+    height: 8.5vh;
+}
+
+/* Gentler hover zoom so the compact column doesn't jump out over the content. */
+:fullscreen button.looma-control-button:hover {
+    transform: scale(1.06);
+}
+:-webkit-full-screen button.looma-control-button:hover {
+    transform: scale(1.06);
+}
+
+@keyframes ttsSpeakPulse {
+    0% {
+        border-color: rgba(255, 212, 0, 0.35);
+        box-shadow: 0 0 0.2em rgba(255, 212, 0, 0.2);
+    }
+    50% {
+        border-color: rgba(255, 212, 0, 1);
+        box-shadow: 0 0 1em rgba(255, 212, 0, 0.95);
+    }
+    100% {
+        border-color: rgba(255, 212, 0, 0.35);
+        box-shadow: 0 0 0.2em rgba(255, 212, 0, 0.2);
+    }
+}
+
+@keyframes ttsPendingSpin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+button.lookup {
+    bottom:44vh;
+    display:none;
+    background-image: url("../images/dictionary.png");
+    background-size: 75% 75%;
+    background-color:rgba(200,200,200,0.7); /* transparent light gray*/
+    cursor: pointer;
+}
+
+button.captions {
+    bottom:49vh;
+    display:none;
+    background-image: url("../images/captions.png");
+    background-size: 75% 75%;
+    background-color:rgba(200,200,200,0.7); /* transparent light gray*/
+    cursor: pointer;
+}
+
+button.download {
+    bottom:55vh;
+    display:none;
+    background-image: url("../images/download.png");
+    background-size: 75% 75%;
+    background-color:rgba(200,200,200,0.7); /* transparent light gray*/
+    cursor: pointer;
+}
+
+button#next-item {
+    bottom:55vh;
+    /*display:none;*/
+    z-index:2147483647; /*this is 2^31-1 which is the z-index browsers use for FULLSCREEN */
+    background-image: url("../images/carrot-fwd.png");
+    background-size: 100% 100%;
+    background-color:rgba(200,200,200,0.7); /* transparent light gray*/
+    cursor: pointer;
+}
+
+button#next-item:hover {
+    opacity: 1;
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    border-color: yellow;
+    border-width: 4px;
+}
+
+button#prev-item {
+    bottom:67vh;
+    /*display:none;*/
+    z-index:2147483647; /*this is 2^31-1 which is the z-index browsers use for FULLSCREEN */
+    background-image: url("../images/carrot-back.png");
+    background-size: 100% 100%;
+    background-color:rgba(200,200,200,0.7); /* transparent light gray*/
+    cursor: pointer;
+}
+
+button#prev-item:hover {
+    opacity: 1;
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    border-color: yellow;
+    border-width: 4px;
+}
+
+button.show-keyboard {
+    bottom: 44vh;
+    background-image: url("../images/keyboard.png");
+    background-size: 110% 110%;
+    background-color: rgba(200,200,200,0.7);
+}
+
+button#bagh-chal {
+    bottom: 44vh;
+    background-image: url("../images/alquerque_board.png");
+    background-size: 80% 80%;
+    background-color: rgba(200,200,200,0.7);
+}
+
+.tts-block-highlight {
+    /* Highlight used for the sentence/block currently being read aloud. */
+    background-color: #ffe44d;
+    color: #111;
+    font-weight: 700;
+    border-radius: 0.15em;
+    padding: 0 0.03em;
+    box-shadow: 0 0 0 0.08em rgba(255, 212, 0, 0.45);
+}
+
+.popup {
+    position:fixed;
+    top:10%;
+    left:25%;
+    margin:auto;
+    padding: 5px;
+    overflow:auto;
+    width:50%;
+    background-color:#fff;
+    color:black;
+    font-size:2.5em;
+    /*white-space: pre;*/
+    border:2px solid black;
+    border-radius:6px;
+    z-index:2000; /*this is 2^31-1 which is the z-index browsers use for FULLSCREEN */
+}
+
+.popup img#image {
+    height:10%;
+}
+
+.popup input { /*The input inside the popup*/
+    color: black;
+}
+
+.popup-button{ /*Buttons inside popups, for example the "OK" button*/
+    height: 5vh;
+    width: 7vw;
+    float : right;
+    font-size : 1.5vw;
+    position: relative;
+}
+#close-popup { /*Specifically the cancel button of a popup*/
+    float: left;
+}
+
+.dismiss-popup { /* close popup button*/
+    color : white;
+    background: red;
+    width: 3vw;
+}
+
+.all-transparent { /*makes screen transparent*/
+    opacity: .6;
+}
+
+#dictionary-popup {
+    max-height:50%;
+    overflow:hidden;
+}
+
+#return {
+    color : white;
+    background-color: red;
+    border-color: red;
+    height: 10vh;
+    width: 10vw;
+    background-image: url("../images/back-arrow.png");
+    background-size: 90% 90%;
+    background-repeat: no-repeat;
+}
+#dismiss {
+    color : white;
+    background-color: red;
+    border-color: red;
+    height: 5vh;
+    width: 4vw;
+    background-image: url("../images/back-arrow.png");
+    background-size: 90% 90%;
+    background-repeat: no-repeat;
+    position:absolute;
+    bottom: 19vh;
+    right: 3vw;
+    z-index:2;
+}
+
+#fullscreen {
+    position: relative;
+    z-index:1000;
+    max-width:100%;
+    width:100%;
+    height:100%; /*trying to find best way to size fullscreen video*/
+}
+
+div.fullframe, iframe {
+    height:100%;
+    width:100%;
+    margin:auto;
+    overflow-y: auto;
+    /*overflow-x: hidden;*/
+}
+
+video {
+    height: 100%;
+    max-height:100%;
+    max-width:100%;
+}
+
+video::-webkit-media-controls {display: none !important;}
+
+button.img {
+	height: 150px;
+	/*vertical-align:middle;*/
+	text-align:center;
+}
+
+button.map {position:relative;}
+
+button.img img, button.img object {
+	position:relative;
+    height:90%;
+    width:35%;
+	float:left;
+	max-width:35%;
+    max-height:90%;
+    object-fit:contain;
+}
+
+button.img > img.icon {
+    position:absolute;
+    right:5px;
+    bottom:5px;
+    width:auto;
+    height:auto;
+    max-width:40px;
+    max-height:32px;
+    object-fit:contain;
+    float:none;
+}
+
+button.img object img {
+    float:left;
+    max-height: 100%;
+    max-width:100%;
+}
+th button.img {
+	height:75px;
+    width:90%;
+}
+
+th button.img:hover {
+	transform:none;
+}
+th button.img img {
+	height:100%;
+    float:left;
+	/*width:15%;*/
+	max-width:35%;
+}
+
+.ch-table tr th:nth-child(3), .ch-table tr th:nth-child(4), .ch-table tr td:nth-child(3), .ch-table tr td:nth-child(4) {width:15%;}
+
+button.img.subject {
+	font-size: 1.5em;
+}
+
+button.img.subject img {
+     width:45%;
+     height:50%;
+     max-width:45%;
+     max-height:50%;
+     margin:5px 2px;
+     float:left;
+     object-fit:contain;
+ }
+
+button.img.play, button.img.activity{
+    position:relative;
+	font-size: 30px;
+	font-weight:bold;
+    max-width:30vw;
+}
+
+button.img p {
+	vertical-align:middle}
+
+button.pdf, button.media{
+	width:10%;
+	height:25%;
+	margin: 2px;
+	font-size:1.5em;
+	background-size: 100% 100%;
+}
+
+button.play-pause {
+        background-image: url("../images/video.png");
+}
+
+button.heading  {
+	transform:none;
+	font-size: 1.5em;
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#aaaaee), color-stop(100%,#bbbbff))}
+
+button.heading:hover {
+	border:none;
+}
+
+button.lesson {
+
+}
+
+button.activities, button.lesson {
+
+}
+
+button.footer {
+	height: 50%;
+	width:  8%;
+	/* margin: 3px; */
+	font-size: 75%;
+	background-color: #999999;
+}
+
+div.center {
+	position:relative;
+	margin:auto;
+	text-align:center;
+}
+
+.error {
+    color:pink;
+    font-weight:bold;
+}
+
+.display-name {
+    display:block;
+    font-size:2em;
+    color:red;
+    background-color:yellow;
+}
+
+.caps {
+    text-transform: capitalize;
+}
+
+.watermark {
+
+    display:none;  /* turn on with individual page CSS files (e.g. in CEHRD theme CSS file)*/
+
+    transform: rotate(-30deg);
+    z-index: 9999;
+    opacity:0.3;
+    position: fixed;
+    top:35%;
+    left:3%;
+    font-size:8em;
+    color:black;
+    background-color:transparent;
+    pointer-events:none;
+}
+
+#marquee {
+    width: 65vw;
+    position: fixed;
+    top:0.5vh;
+    margin:auto;
+    direction: "left";
+    height: 100px;
+}
+
+/* @media for smartphones */
+
+/*@media all and (device-width: 667px) and (device-height: 322px) and (orientation:landscape) {
+    #main-container-horizontal { height: 1024px; }
+} */
+@media screen and (max-width:480px) and (orientation:portrait),
+       screen and (max-width:916px) and (orientation:landscape) {
+
+    body {
+        --looma-background: var(--looma-blue);
+        background-color: var(--looma-background);
+        font-family: "Noteworthy";
+    }
+    h1.title {font-size:2em;}
+
+    button.img.play, button.img.activity, button.img.map {
+        width: 27vw;
+        height:18vh;
+        font-size: 1em;
+    }
+
+    button.img {
+        height: 40vh;
+        width: 27vw;
+    }
+
+    th, td{
+        padding: 0;
+    }
+    td button, th button{
+        margin: 0;
+    }
+
+    /* Reduce control button sizes for small screens */
+    button.looma-control-button {
+        height: 9vh;
+        width: 9vh;
+    }
+
+    button.speak {
+        bottom: 16vh;
+    }
+
+    button.looma-assistant {
+        bottom: 40vh;
+    }
+
+    button#fullscreen-control {
+        bottom: 8vh;
+    }
+
+}

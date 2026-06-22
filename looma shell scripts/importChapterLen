@@ -1,0 +1,53 @@
+// mongo terminal program "importChapterLen"
+//      input from a CSV file
+//
+//  make sure there is a file 'chapterLenToImport.txt' in TAB-SEPARATED format, in the current directory
+//  start MONGO in LOOMA db with: 'mongo looma'
+//  run in MONGO SHELL with: load('importChapterLen')
+//
+//"use strict";
+
+var requestcount = 0;
+var changecount = 0;
+
+var input = 'chapterLenToImport.txt';
+print ('Importing chapter LEN fields from ' + input);
+print ('*****');
+print ('------------ param = ' + param);
+print ('*****');
+var file = cat(input);  // read  the file (for now, specifying a path doesnt work)
+
+var docs = file.split(/[\r\n]+/);  // split file into array of lines containing (DN, FN, CH_LO, cl_HI)
+
+print ('Processing ' + docs.length + ' lines');
+
+docs.forEach( function(doc) {
+    var fields = doc.split(/\t/);  //split the line on TABs
+    if (fields[0] !== "") {
+        var chapterId = fields[0];
+        requestcount++;
+        //print(requestcount + ' - - CHECKING ' + displayname + ' [' + filename + '] adding ' + fields.toString());
+        
+        var chapters = db.chapters.find({ '_id': chapterId});
+        var duplicates = 0;
+        if (!chapters.hasNext()) print('CHAPTER ' + chapterId + ' NOT FOUND');
+        while (chapters.hasNext()) {
+            var chapter = chapters.next();
+            duplicates++; if (duplicates > 1) print('*************NOTE: duplicate CHAPTER FOUND, Name = ' + chapterId);
+            
+            if (fields[2]) chapter['len'] = fields[2];
+            if (fields[4]) chapter['nlen'] = fields[4];
+            
+            if (param !== 'dryrun') db.chapters.update({_id: chapter._id}, chapter);
+            
+            print(++changecount + ' - - CHANGED LEN and NLEN for ' + chapterId + ' TO ' + fields[2] + ' and ' + fields[4]);
+        }
+    } else print('*******    BAD INPUT LINE: ' + doc);
+});  // end foreach doc
+
+print('');
+if (param==='dryrun') print ('------------ param = ' +  param + ', no writes to db');
+else                  print ('------------ param = ' +  param + ', changes were written to db');
+
+print('+++++  ' + requestcount + '  lines processed');
+print('+++++  ' + changecount + '  changes made');

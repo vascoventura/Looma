@@ -1,0 +1,42 @@
+
+/* Control-button column — explicit, evenly-spaced bottoms (13vh apart for the
+   12vh buttons). The looma.css defaults put lookup and show-keyboard both at
+   44vh, which overlapped; these overrides keep the stack clean. */
+button#fullscreen-control {
+    display:inline-block;
+    bottom: 11vh;
+}
+
+button.speak {
+    display:inline-block;
+    bottom: 24vh;
+}
+
+button.looma-control-button.speak.tts-busy {
+    transform: scale(1.2) !important;
+    transform-origin: center center !important;
+    border: 0.22em solid #ffd400 !important;
+    outline: 0.18em solid #ffd400 !important;
+    outline-offset: 0.08em !important;
+    box-shadow: 0 0 1em rgba(255, 212, 0, 0.95) !important;
+    animation: ttsSpeakPulse 0.9s ease-in-out infinite;
+    pointer-events: none !important;
+}
+
+button.lookup {
+    display:inline-block;
+    bottom: 37vh;
+}
+
+button.show-keyboard {
+    display:inline-block;
+    /* Slots tightly above Lookup (37vh, edge 49vh). The Assistant is placed
+       dynamically by looma-assistant-button.js ON TOP of the whole column,
+       so the order from bottom up is: Fullscreen, Speak, Lookup, Keyboard,
+       Assistant — no gaps, no overlaps. */
+    bottom: 50vh;
+}
+
+iframe {background-color:white;}
+
+#column-one {display:none !important;}

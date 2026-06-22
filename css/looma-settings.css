@@ -1,0 +1,127 @@
+#main-container-horizontal {}
+
+h1.title {
+    font-size: 3em;
+    margin-bottom: 1.6rem;   /* breathing room between the title and the page content */
+}
+
+#user-tools {
+    height:28%;
+    overflow:hidden;
+    padding-top: 4px;
+    position:relative;
+    font-size: 1.2em;
+}
+
+#user-tools p {
+    max-height:7vh;
+}
+
+#tools {
+    height:55%;
+    margin: 0 auto;
+    font-size: 1.2em;
+}
+
+button {display:inline;}
+
+button.img.activity {max-width:50vw;}
+button.img.activity img {
+    max-width:50%;
+    max-height:60%;
+    padding:0 5px 20px 0;}
+
+ #tools button {
+     height:5vh;
+     width:20vw;
+ }
+
+#voicegender {float:left;
+    margin-left:28vw;
+}
+
+#speechtest {
+    margin-left:1vw;
+}
+
+div#themelist {
+    margin-left:10%;
+   /* display:inline-block;*/
+    text-align:left;
+}
+
+span.themespan img {
+	display:none;
+}
+
+span.theme:hover img {
+	display:inline;
+	position:absolute;
+	left:20%;
+}
+
+span#themes {font-size: 1em}
+
+#themelist select {
+    border-radius:5px;
+    font-size: 1em;
+    font-weight:bold;
+    height:5vh;
+    width:15vw;
+}
+
+#voicelist select {
+    border-radius:5px;
+    height:5vh;
+    width:15vw;
+}
+
+select.theme, select.voice {
+    vertical-align:middle;
+}
+
+.login {
+    height:10%;
+    width:20%;
+    font-size:1em;
+}
+
+/* Login message stacked above its action buttons, the whole block centred. */
+#login-box {
+    text-align: center;
+    margin: 0 auto 1.6rem;
+}
+
+#login-status {
+    display: block;
+    font-weight: bold;
+    color: red;
+    margin-bottom: 0.7rem;
+}
+
+#login-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.settings-control, .admin-control, .exec-control {
+    font-weight: bold;
+    font-size:1em;
+    margin:5px 2px;
+    display:none;
+}
+
+.exec-control  select, button.exec-control  {color:red;}
+.admin-control select, button.admin-control {color:blue;}
+
+a, a:focus, a:hover {text-decoration: none;
+    }
+
+a button.logo {height:18vh;font-size:1.5em;}
+
+button.logo img {
+    height:8vh;
+    margin:auto;
+}

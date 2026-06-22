@@ -1,0 +1,124 @@
+/*
+ * Name: Skip
+ *
+ * Owner: VillageTech Solutions (villagetechsolutions.org)
+ * Date: 2015 10
+ * Revision: Looma 2.0.0
+ *
+ * filename: looma-chapters.js
+ * Description:
+ */
+
+'use strict';
+
+
+function chapterButtonClicked(event){
+    //called when a CHAPTER button is pressed
+    var button = event.target;
+    if (button.getAttribute('data-ft') === 'section' && button.getAttribute('data-len') == 0) return false;
+    LOOMA.setStore('chapter',  button.getAttribute('data-ch'), 'session');  //set a COOKIE for CHAPTER
+    //document.cookie = "chapter=" + button.getAttribute('data-ch');  //set a COOKIE for CHAPTER
+
+    //remember scroll position
+    LOOMA.setStore('chapterScroll', $("#main-container-horizontal").scrollTop(), 'session');
+
+    LOOMA.playMedia(button);
+};
+
+function activityButtonClicked(){
+        //called when a ACTIVITY button is pressed
+        var chapter_id = this.getAttribute('data-ch');
+    var chapter_dn = this.getAttribute('data-chdn');
+    var chapter_ndn = this.getAttribute('data-chndn');
+        var chapter_lang = this.getAttribute('data-lang');
+
+        LOOMA.setStore('chapter', chapter_id, 'session');    //set a COOKIE for CHAPTER
+        //remember scroll position
+        LOOMA.setStore('chapterScroll', $("#main-container-horizontal").scrollTop(), 'session');
+
+        var className = LOOMA.readStore("class", 'session');
+        var subject = LOOMA.readStore("subject", 'session');
+
+        //send GET request to looma-activities.php with CLASS,SUBJECT, CH_ID values
+        chapter_id = encodeURIComponent(chapter_id);
+    chapter_dn = encodeURIComponent(chapter_dn);
+    //chapter_ndn = encodeURIComponent(chapter_ndn);
+        window.location = "activities?ch=" + chapter_id +
+                                                "&chdn=" + chapter_dn +
+                                                "&chndn=" + chapter_ndn +
+                                                "&chapter_lang=" + chapter_lang +
+                                                "&grade=" + className +
+                                                "&subject=" + subject;
+    };  //  end activityButtonClicked()
+
+function lessonButtonClicked(){
+        //called when a LESSON button is pressed
+    var chapter_id = this.getAttribute('data-ch');
+    var mongo_id =   this.getAttribute('data-id');
+    var chapter_lang = this.getAttribute('data-lang');
+
+    LOOMA.setStore('chapter', chapter_id, 'session');    //set a COOKIE for CHAPTER
+    LOOMA.setStore('chapterScroll', $("#main-container-horizontal").scrollTop(), 'session'); //remember scroll position
+    LOOMA.clearStore('lesson-plan-index','session');
+    //send GET request to looma-play-lesson.php with mongo_id value
+    mongo_id = encodeURIComponent(mongo_id);
+    window.location = "looma-play-lesson.php?id=" + mongo_id + "&lang=" + chapter_lang;
+};  //  end lessonButtonClicked()
+
+function lessonsButtonClicked() {
+    var chapter =   this.getAttribute('data-ch');
+    var chapter_lang = this.getAttribute('data-lang');
+    window.location = "looma-lessons.php?ch_id=" + chapter + "&lang=" + chapter_lang;
+};  // end lessonsButtonClicked()
+
+function exerciseButtonClicked(){
+    // called when an EXERCISE (AI quiz) button is pressed
+    var chapter_id = this.getAttribute('data-ch');
+    var chapter_lang = this.getAttribute('data-lang');
+    var grade = this.getAttribute('data-grade') || LOOMA.readStore('class', 'session') || '';
+    var subject = this.getAttribute('data-subject') || LOOMA.readStore('subject', 'session') || '';
+    var language = this.getAttribute('data-language') || chapter_lang || '';
+
+    LOOMA.setStore('chapter', chapter_id, 'session');
+    LOOMA.setStore('chapterScroll', $("#main-container-horizontal").scrollTop(), 'session');
+
+    var url = 'looma-play-exercise.php?ch_id=' + encodeURIComponent(chapter_id)
+            + '&grade=' + encodeURIComponent(grade)
+            + '&subject=' + encodeURIComponent(subject)
+            + '&language=' + encodeURIComponent(language)
+            + '&lang=' + encodeURIComponent(chapter_lang || language);
+    window.location = url;
+};  // end exerciseButtonClicked()
+
+function showSummary() {
+    LOOMA.alert('summary here',5);
+}
+
+$(document).ready (function() {
+    //add listeners to ACTIVITY and CHAPTER buttons
+    $("button.activities").click(activityButtonClicked);
+    $("button.lesson").click(lessonButtonClicked);
+    $("button.lessons").click(lessonsButtonClicked);
+    $("button.exercise").click(exerciseButtonClicked);
+    $("button.chapter, button.section").click(chapterButtonClicked);
+
+    //    $("button.chapter, button.section").on('contextmenu',chapterButtonRightClicked);
+
+    // check cookies to see if there is an active CHAPTER
+    // if so, add class='active' to all the buttons for this CHAPTER (if any)
+
+    var chapterCookie = LOOMA.readStore('chapter', 'session');
+    if (chapterCookie) {
+        $('button.chapter[data-ch="' + chapterCookie + '"]').addClass('active');
+        $('button.activities[data-ch="' + chapterCookie + '"]').addClass('active');
+        $('button.lesson[data-ch="' + chapterCookie + '"]').addClass('active');
+    };
+
+    //scroll to prior scroll position
+    $("#main-container-horizontal").scrollTop(LOOMA.readStore('chapterScroll', 'session'));
+
+    $(".chapter .info").hover(function(){showSummary()});
+
+    toolbar_button_activate("home");
+
+}); //end of document.ready anonymous function

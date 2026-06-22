@@ -1,0 +1,177 @@
+
+#main-container-horizontal {
+    display:grid;
+    grid-template-rows:  1fr 3fr 20fr 3fr;
+    grid-template-columns: [left] 4fr [middle-left] 6fr [middle-right] 3fr [right];
+
+    /*font-size:1.75em;*/
+}
+
+#title {
+     grid-row: 1;
+    padding-top: 2vh;
+     grid-column: left / middle-right;
+ }
+
+#logo {
+    grid-row: 2;
+    grid-column: left/middle-right;
+}
+#logo img {
+    vertical-align:middle;
+}
+
+#log-viewer {
+    grid-row: 2;
+    margin-top:15vh;
+    margin-left:3vw;
+    height:33%;
+    width:33%;
+    grid-column: left/middle-left;
+}
+
+#log-viewer button {
+
+    margin-top: -3vh;
+    height: 5vh;
+    float: left;
+    margin-left: 1vw;
+   /* background-image: url(../images/activity.png);*/
+    background-size: 100%;
+    background-repeat: no-repeat;
+}
+button:hover span.tip.yes-show {
+    position: relative;
+    font-size:1em;
+}
+#about {
+    grid-row: 2;
+    grid-column: left / middle-right;
+}
+
+.copyright {
+    height:2vh;
+    margin-right:0.5vw;
+    line-height:0.5em;
+}
+
+a {color:lightgreen;}
+ #logos {
+     grid-row: 3;
+     grid-column: left / middle-right;
+     display:grid;
+     grid-template-columns: repeat(8, 1fr); /* 8 columns */
+     place-items: center;
+     justify-content: center;
+     overflow:hidden;
+     background-color: white;
+     border:3px solid red;
+     border-radius:12px;
+     padding:5px;
+     padding-left:2vw;
+     margin: 2vh 3vw;
+ }
+#logos .break-row {
+    grid-column: 1 / -1;  /* start at first column line, span full row */
+}
+
+a img {
+    height:10vh;
+}
+
+#logos h5 {
+    color:blue;
+    text-align:center;
+    margin:0;}
+
+ img.loomalogo {
+     height:10vh;
+ }
+
+img.cehrd-logo {
+    position:absolute;
+    top: 3vh;
+    left: 4vw;
+    height: 20vh;
+    grid-row: 2;
+    grid-column: left / middle-left;
+}
+
+ #credits-title {
+     grid-row: 1;
+     grid-column: middle-right /right;
+     margin-right:5vw;
+ }
+
+ #credits {
+     grid-row: 2 / -1;
+     grid-column: middle-right;
+     border-radius:5px;
+     background: #fff;
+     color:black;
+     margin:3px 5px;
+     height:95%;
+     width:75%;
+    padding:0 auto;
+
+     font-size: 1em;
+     overflow:hidden;
+     text-align:center;
+ }
+
+ #credits ul {padding: 0;}
+
+#credits li {list-style-type: none;}
+
+span {
+    margin:auto;
+}
+
+ #system_info {
+     grid-row: 2;
+     height:10vh;
+     grid-column: left / middle-left;
+     margin-left:3vw;
+     font-size: 2em;
+ }
+
+#advanced_button {
+    margin-top: 3vh;
+     height: 5vh;
+     float: left;
+     margin-left: 1vw;
+ }
+
+#advanced_info {
+    display:none;
+    position:absolute;
+    bottom:39vh;
+    left:13vw;
+    padding:2vh;
+    border:3px solid red;
+    border-radius: 6px;
+    color:blue;
+    background:white;
+}
+
+ .screensize, .bodysize, .ip, .system, .mongo-version, .php-version {
+     vertical-align:middle;
+     text-align:left;
+     font-size: 0.8em;
+     line-height:1.5vh;
+ }
+
+.ip:hover {
+    font-size:1em;
+}
+
+ #trademark {
+     position:relative;
+     top:-20px;
+ }
+
+#info-panel {
+    grid-row: 4;
+    grid-column: left / middle-right;
+    line-height:0.5em;
+}

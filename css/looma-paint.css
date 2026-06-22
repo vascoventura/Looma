@@ -1,0 +1,144 @@
+/*looma-paint-new.css*/
+
+button#fullscreen-control {
+    /* The bottom toolbar (yellow Looma menu) occupies the last 10vh of the
+       viewport. Lift the fullscreen button above it so it doesn't sit on
+       top of the toolbar buttons. */
+    bottom: 12vh;
+    right: 1.5vw;
+    display: inline-block;
+}
+
+#canvas-div {
+    min-height:0;
+    position: absolute;
+    background-color: #fff;
+    height: auto;
+    top:1vh;
+    bottom:1vh;
+    width: calc(100% - 11vw);
+    left:1vw;
+    padding:5px;
+    border-radius:1vh;
+    box-sizing:border-box;
+}
+
+canvas {
+    /*cursor: url(../images/cursor-crosshair.png), crosshair;*/
+    cursor: crosshair;
+    position: absolute;
+    background-color: transparent;
+    /*z-index:1;*/
+    bottom: 0;
+    left:0;
+    /*top: 15%; */
+    width:100%;
+    box-sizing: border-box;
+    height: 100%;
+}
+
+#paint-toolbar {
+    position: absolute;
+    width:8.5vw;
+    height:auto;
+    right:1vw;
+    top:1vh;
+    bottom:10vh;
+    display:grid;
+    grid-row-gap: 1.5vh;
+    grid-template-rows: repeat(8, 1fr);
+    padding: 1vh 0 1vh 1vw;
+    overflow:visible;
+    box-sizing:border-box;
+}
+.button-div.drop {
+    display:inline-block;
+    margin:auto;
+    overflow:visible;
+    z-index: 10;
+}
+
+.dropdown {
+    display:inline-block;
+    position:relative;
+    width:7.5vw;
+    height:min(11vh, 88px);
+}
+
+.drop-button {
+    background-color:#eee;
+    padding: 7px;
+    color:black;
+    border:none;
+    width:100%;
+    height:100%;
+    cursor:pointer;
+    font-size:2em;
+    overflow:visible;
+    /*z-index: 10;*/
+}
+
+.drop-button img {
+    height:90%;
+    
+    /*z-index: 10;*/
+}
+
+.drop-content {
+    display:none;
+    position:absolute;
+    right:7.8vw;
+    top:0;
+   /* top:3vh;*/
+    background-color: #f9f9f9;
+    color:black;
+    font-size:0.7em;
+    width:8vw;
+    max-height:calc(100vh - 18vh);
+    overflow-y:auto;
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+    z-index:30;
+}
+
+.drop-content img {
+    width:75%;
+    max-height: 8vh;
+    padding:5%;
+}
+
+.drop-content p {
+    font-size:0.7em;
+    padding:5%;
+}
+.drop-content p:hover{
+    background-color: #0e0e0e;
+    color:white;
+}
+.drop-content img:hover{
+    background-color: #ccc;
+    color:white;
+}
+
+.dropdown:hover .drop-content {
+    display: block;
+}
+
+div#notice {
+    position:absolute;
+    top:40%;
+    left:40%;
+    border: 2px solid black;
+    border-radius: 5px;
+    padding: 8px;
+    background-color: white;
+    color:black;
+    font-size: 3em;
+    z-index: 20;
+}
+
+.credit {
+    bottom:10vh;
+    right:10vw;
+    height:3vh;
+    color:black;
+}

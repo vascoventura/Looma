@@ -1,0 +1,52 @@
+// ONE TIME program to
+//    find how many lessons contain a given filetype or src(e.g. ePaath, wikipedia, etc.)
+//
+//  file: lessonscanforfiletype
+//  run in MONGO SHELL with: load('lessonscanforfiletype')
+//       or in BASH with:    mongo looma < lessonscanforfiletype
+//
+
+var activitycursor, lessons;
+
+var count = 0;
+var wcount = 0;
+var filesrc = 'wiki2007';
+
+print ('*****scanning  lessons for ' + filesrc);
+lessons = db.lessons.find();
+while (lessons.hasNext()) {
+    var lesson = lessons.next();
+    
+   // print (lesson.dn + ' ***  '+ lesson.data);
+    
+    var wikis = [];
+    if (! lesson.data) print ("lesson without data - " + lesson.dn)
+        else if (!lesson.data.forEach) print("..... lesson data is not array for " + lesson.dn);
+    else {
+        lesson.data.forEach ( function(data) {
+            //print ('id is ' + data['id']);
+            if (data.collection === 'activities') {
+                activitycursor = db.activities.findOne({'_id':ObjectId(data['id'])});
+                //print('cursor is ' + activitycursor);
+                if (activitycursor &&
+                    activitycursor.src === filesrc)
+                   // filetype.indexOf(activitycursor.src) !== -1)
+                {
+                    wikis.push(activitycursor.dn);
+                    wcount++;
+                }
+            }
+        });
+    }
+    if (wikis.length > 0) {
+        count++;
+        print(lesson.dn + ' - - - has these wikipedia articles:');
+        wikis.forEach(function(item) {print('    ' + item)});
+        
+    }
+        //count += 1;
+};
+print('');
+print(count + ' lessons have ' + wcount + ' ' + filesrc + ' elements');
+
+
