@@ -17,12 +17,17 @@ button span.english-keyword, button span.native-keyword {
     display:block;
 }
 
+/* The floating name label sat ON TOP of the tile's own title (confirmed
+   visually — e.g. hovering "Khan Academy" showed a yellow box overlapping its
+   own text, unreadable). A border around the tile itself is a clearer, simpler
+   hover cue, so drop the label entirely on library tiles. */
 button:hover span.tip.yes-show.big-show {
-    width:25vw;
-    position:relative;
-    bottom:1vh;
-    left:0;
- }
+    display: none;
+}
+button.activity:hover {
+    outline: 3px solid #FFE44D;
+    outline-offset: -3px;
+}
 
 .black-border {
     border: 2px solid black;

@@ -48,7 +48,6 @@ services:
       # even if AI is down.
       LOOMA_SEARCH_URL_ZVEC: http://looma-search:46333/search
       LOOMA_AI_URL: http://looma-ai:8089
-      LOOMA_MIMIC_URL: http://looma-mimic:5003/tts
       # OpenTelemetry — PHP shim posts spans to the otel-collector. We also
       # publish counters/logs from looma-telemetry.php and logPageHit().
       OTEL_SERVICE_NAME: looma-web
@@ -64,29 +63,14 @@ services:
       - looma-db
       - looma-search
       - looma-ai
-      - looma-mimic
     restart: unless-stopped
     tty: true
     networks:
       - loomanet
 
-  looma-mimic:
-    build:
-      context: ..
-      dockerfile: Looma/mimic-service/Dockerfile
-    image: looma-mimic:latest
-    container_name: looma-mimic
-    ports:
-      - "45003:5003"
-    healthcheck:
-      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5003/health').read()"]
-      interval: 10s
-      timeout: 3s
-      retries: 15
-    restart: unless-stopped
-    tty: true
-    networks:
-      - loomanet
+  # NOTE: the looma-mimic TTS service was removed. Piper (served locally inside
+  # looma-web via looma-TTS.php) is now the only TTS engine, so Looma speaks
+  # fully offline. Mimic/ResponsiveVoice/browser-speech were dropped.
 
   looma-ai:
     build:

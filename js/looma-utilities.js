@@ -1636,12 +1636,18 @@ LOOMA.speak = function(text, engine, voice, rate) {
        rate = rateEn;
        speed = 1/rate;
 
-    // When the caller does not name an engine — e.g. the Speak button reading
-    // a text selection — fall back to the user's saved default TTS technology
-    // (chosen on the Reading Settings page; stored in the tts-engine / tts-voice
-    // cookies). Defaults to piper, matching Looma's long-standing behaviour.
+    // When the caller does not name an engine — e.g. the Speak button reading a
+    // text selection — fall back to the user's saved default TTS technology
+    // (chosen on the Reading Settings page; stored in the tts-engine cookie).
+    // With NO saved preference, follow the network: online -> ResponsiveVoice
+    // (better cloud voices), offline -> Piper (local, always works). A saved
+    // preference is still honoured here, but engine === 'responsivevoice' also
+    // falls back to Piper on its own if it actually fails to load/connect (see
+    // the ResponsiveVoice branch below) — so reading never just goes silent
+    // because the box lost its connection mid-session.
     if (!engine) {
-        engine = LOOMA.readStore('tts-engine', 'cookie') || 'piper';
+        engine = LOOMA.readStore('tts-engine', 'cookie') ||
+                 (navigator.onLine ? 'responsivevoice' : 'piper');
         if (!voice) {
             var _ve = LOOMA.readStore('tts-voice-en', 'cookie');
             var _vn = LOOMA.readStore('tts-voice-np', 'cookie');
@@ -1649,6 +1655,10 @@ LOOMA.speak = function(text, engine, voice, rate) {
             else voice = LOOMA.readStore('tts-voice', 'cookie') || voice;  // legacy single-voice cookie
         }
     }
+    // The only supported engines are Piper (local/offline) and ResponsiveVoice
+    // (cloud). Mimic and the browser speechSynthesis engine were removed, so any
+    // stale/other value is coerced to Piper.
+    if (engine !== 'piper' && engine !== 'responsivevoice') engine = 'piper';
 
     // `voice` may be a plain string (one voice for all text) or a per-language
     // map { en, np } chosen on the Reading Settings page. Resolve both forms so the
@@ -2002,6 +2012,24 @@ LOOMA.speak = function(text, engine, voice, rate) {
     //start of LOOMA.speak code: ///
     ////////////////////////////////
 
+         // Shared by every engine that highlights as it reads (Piper/Mimic and
+         // ResponsiveVoice): short sentence-level chunks so the highlight can
+         // follow along, instead of one giant utterance highlighted all at once
+         // (or, before this fix, not highlighted at all — see the ResponsiveVoice
+         // branch below).
+         function splitIntoPlaybackSegments(sourceText) {
+             var normalized = sourceText
+                 .replace(/\r/g, ' ')
+                 .replace(/\n+/g, ' ')
+                 .replace(/\s+/g, ' ')
+                 .trim();
+             if (!normalized) return [];
+
+             return (normalized.match(/[^.!?।]+[.!?।]?/g) || [normalized])
+                 .map(function (part) { return part.replace(/\s+/g, ' ').trim(); })
+                 .filter(function (part) { return part.length > 0; });
+         }
+
          if (engine === 'synthesis') {
              // we use synthesis if the user is running Safari or Chrome - any browser that has speechSynthesis installed
              // Firefox does have speechSynthesis, but be sure to set webspeech.synth.enabled=true in about:config
@@ -2087,10 +2115,12 @@ LOOMA.speak = function(text, engine, voice, rate) {
              // external script is loaded LAZILY (LOOMA.speak.ensureResponsiveVoice)
              // the first time the user presses Speak with this engine selected, so
              // pages that never use it make no request to responsivevoice.org. If
-             // it cannot be loaded, fail quietly rather than falling through to Piper.
+             // it cannot be loaded (typically: the box has no internet right now),
+             // fall back to Piper instead of just going silent — a box that drops
+             // offline mid-session must still be able to read aloud.
              LOOMA.speak.ensureResponsiveVoice(function (rvAvailable) {
              if (!rvAvailable) {
-                 console.warn('ResponsiveVoice is unavailable (needs internet + a valid key).');
+                 console.warn('ResponsiveVoice is unavailable (needs internet + a valid key) — falling back to Piper.');
                  // Surface the outage in Grafana: emit an ERROR-status span on
                  // the same tts.responsivevoice series the dashboards already
                  // query, plus a tts_speak event for the logs side.
@@ -2120,7 +2150,7 @@ LOOMA.speak = function(text, engine, voice, rate) {
                          });
                      }
                  } catch (e) {}
-                 LOOMA.speak.disable();
+                 LOOMA.speak(text, 'piper', voice, rate);
              } else {
                  // Pressing Speak again while it is talking stops it (toggle),
                  // matching how the other engines behave.
@@ -2160,42 +2190,80 @@ LOOMA.speak = function(text, engine, voice, rate) {
                          tts_text_chars: (text || '').length,
                          tts_source:     rvSrc
                      };
-                     responsiveVoice.cancel();
-                     responsiveVoice.speak(text, rvVoice, {
-                         rate: rvRate,
-                         onstart: function () {
-                             try {
-                                 if (window.LOOMA && LOOMA.otel && LOOMA.otel.emitSpan) {
-                                     LOOMA.otel.emitSpan('tts.responsivevoice', rvT0, Date.now(), 1, rvSpanAttrs);
-                                 }
-                             } catch (e) {}
-                             try {
-                                 if (window.LOOMA && LOOMA.telemetry && LOOMA.telemetry.track) {
-                                     LOOMA.telemetry.track('tts_speak',
-                                         Object.assign({ tts_status: 'ok' }, rvEventBase));
-                                 }
-                             } catch (e) {}
-                             LOOMA.speak.activate();
-                         },
-                         onerror: function (ev) {
-                             var msg = String((ev && (ev.error || ev.message)) || 'responsivevoice error');
-                             try {
-                                 if (window.LOOMA && LOOMA.otel && LOOMA.otel.emitSpan) {
-                                     LOOMA.otel.emitSpan('tts.responsivevoice', rvT0, Date.now(), 1,
-                                         Object.assign({ 'error.message': msg }, rvSpanAttrs),
-                                         { statusCode: 2 });
-                                 }
-                             } catch (e) {}
-                             try {
-                                 if (window.LOOMA && LOOMA.telemetry && LOOMA.telemetry.track) {
-                                     LOOMA.telemetry.track('tts_speak',
-                                         Object.assign({ tts_status: 'error', tts_error: msg }, rvEventBase));
-                                 }
-                             } catch (e) {}
+                     // Speak sentence-by-sentence (like Piper/Mimic below) instead of
+                     // handing the WHOLE text to ResponsiveVoice as one utterance —
+                     // that old shape never called highlightBlock() at all, so the
+                     // reading highlight only ever showed up with Piper, never with
+                     // ResponsiveVoice. rvRunId (shared LOOMA.speak.runId counter,
+                     // same one Piper/Mimic use) stops a stale chain the moment a
+                     // new speak() call or cancel() supersedes it.
+                     var rvRunId = ++LOOMA.speak.runId;
+                     var rvSegments = splitIntoPlaybackSegments(text);
+                     LOOMA.speak.highlightContext = LOOMA.speak.buildHighlightContext();
+
+                     function speakNextRvSegment(index) {
+                         if (rvRunId !== LOOMA.speak.runId) return;
+                         var segment = rvSegments[index];
+                         if (!segment) {
+                             LOOMA.speak.clearBlockHighlight();
                              LOOMA.speak.disable();
-                         },
-                         onend:   function () { LOOMA.speak.disable(); }
-                     });
+                             return;
+                         }
+                         responsiveVoice.speak(segment, rvVoice, {
+                             rate: rvRate,
+                             onstart: function () {
+                                 if (rvRunId !== LOOMA.speak.runId) return;
+                                 if (index === 0) {
+                                     try {
+                                         if (window.LOOMA && LOOMA.otel && LOOMA.otel.emitSpan) {
+                                             LOOMA.otel.emitSpan('tts.responsivevoice', rvT0, Date.now(), 1, rvSpanAttrs);
+                                         }
+                                     } catch (e) {}
+                                     try {
+                                         if (window.LOOMA && LOOMA.telemetry && LOOMA.telemetry.track) {
+                                             LOOMA.telemetry.track('tts_speak',
+                                                 Object.assign({ tts_status: 'ok' }, rvEventBase));
+                                         }
+                                     } catch (e) {}
+                                 }
+                                 LOOMA.speak.activate();
+                                 LOOMA.speak.buttonActive = true;
+                                 LOOMA.speak.applyBusyButtonState();
+                                 LOOMA.speak.updateButtonAvailability();
+                                 LOOMA.speak.highlightBlock(segment);
+                             },
+                             onerror: function (ev) {
+                                 if (rvRunId !== LOOMA.speak.runId) return;
+                                 var msg = String((ev && (ev.error || ev.message)) || 'responsivevoice error');
+                                 try {
+                                     if (window.LOOMA && LOOMA.otel && LOOMA.otel.emitSpan) {
+                                         LOOMA.otel.emitSpan('tts.responsivevoice', rvT0, Date.now(), 1,
+                                             Object.assign({ 'error.message': msg }, rvSpanAttrs),
+                                             { statusCode: 2 });
+                                     }
+                                 } catch (e) {}
+                                 try {
+                                     if (window.LOOMA && LOOMA.telemetry && LOOMA.telemetry.track) {
+                                         LOOMA.telemetry.track('tts_speak',
+                                             Object.assign({ tts_status: 'error', tts_error: msg }, rvEventBase));
+                                     }
+                                 } catch (e) {}
+                                 LOOMA.speak.clearBlockHighlight();
+                                 LOOMA.speak.disable();
+                             },
+                             onend: function () {
+                                 if (rvRunId !== LOOMA.speak.runId) return;
+                                 speakNextRvSegment(index + 1);
+                             }
+                         });
+                     }
+
+                     responsiveVoice.cancel();
+                     if (rvSegments.length === 0) {
+                         LOOMA.speak.disable();
+                     } else {
+                         speakNextRvSegment(0);
+                     }
                  }
              }
              });
@@ -2240,20 +2308,6 @@ LOOMA.speak = function(text, engine, voice, rate) {
                  LOOMA.speak.currentSourceText = text;
                  LOOMA.speak.currentSourceSnapshot = LOOMA.speakCloneSnapshot(activeSnapshot);
                  //console("Playing Audio: " + text);
-
-                 function splitIntoPlaybackSegments(sourceText) {
-                     // Short sentence-level chunks start faster than large paragraphs and allow per-sentence language detection.
-                     var normalized = sourceText
-                         .replace(/\r/g, ' ')
-                         .replace(/\n+/g, ' ')
-                         .replace(/\s+/g, ' ')
-                         .trim();
-                     if (!normalized) return [];
-
-                     return (normalized.match(/[^.!?।]+[.!?।]?/g) || [normalized])
-                         .map(function (part) { return part.replace(/\s+/g, ' ').trim(); })
-                         .filter(function (part) { return part.length > 0; });
-                 }
 
                  var playbackSegments = splitIntoPlaybackSegments(text);
                  console.log("Speaking " + playbackSegments.length + " segments.");
@@ -2851,7 +2905,13 @@ LOOMA.speak.installButtonGuard = function () {
         // first press would race the async download and Chrome's autoplay policy
         // and stay silent. No-op (and no network call) for any other engine.
         try {
-            if (LOOMA.readStore('tts-engine', 'cookie') === 'responsivevoice') {
+            // Mirrors LOOMA.speak()'s own engine resolution (saved cookie, else
+            // online -> responsivevoice / offline -> piper) so the preload kicks
+            // in whenever a click would actually end up using ResponsiveVoice,
+            // not only when the cookie names it explicitly.
+            var _rvWillRun = LOOMA.readStore('tts-engine', 'cookie') ||
+                              (navigator.onLine ? 'responsivevoice' : 'piper');
+            if (_rvWillRun === 'responsivevoice') {
                 LOOMA.speak.ensureResponsiveVoice(function () {});
             }
         } catch (e) {}
