@@ -2209,10 +2209,59 @@ LOOMA.speak = function(text, engine, voice, rate) {
                              LOOMA.speak.disable();
                              return;
                          }
+
+                         // ResponsiveVoice does not always deliver onend — most
+                         // reliably on the very FIRST utterance of a session,
+                         // where RV/Chrome can drop the callback entirely. With
+                         // the chain hanging off onend alone that silently ended
+                         // the reading after sentence one. advance() is the single
+                         // way forward, is idempotent, and is additionally driven
+                         // by a watchdog that polls RV's own playing state, so a
+                         // missing callback costs a short pause instead of the
+                         // rest of the text.
+                         var advanced = false;
+                         var watchdog = null;
+                         function stopWatchdog() {
+                             if (watchdog) { clearInterval(watchdog); watchdog = null; }
+                         }
+                         function advance() {
+                             if (advanced) return;
+                             advanced = true;
+                             stopWatchdog();
+                             if (rvRunId !== LOOMA.speak.runId) return;
+                             // Leave RV's own callback stack before starting the
+                             // next utterance; speaking from inside onend can be
+                             // swallowed while RV is still tearing the last one down.
+                             setTimeout(function () { speakNextRvSegment(index + 1); }, 0);
+                         }
+                         function startWatchdog() {
+                             stopWatchdog();
+                             var idleTicks = 0;
+                             watchdog = setInterval(function () {
+                                 if (advanced || rvRunId !== LOOMA.speak.runId) { stopWatchdog(); return; }
+                                 var playing;
+                                 try {
+                                     playing = (typeof responsiveVoice.isPlaying === 'function')
+                                         ? responsiveVoice.isPlaying() : true;
+                                 } catch (e) { playing = true; }
+                                 // Require several consecutive idle reads: RV reports
+                                 // "not playing" briefly between its own internal chunks.
+                                 idleTicks = playing ? 0 : (idleTicks + 1);
+                                 if (idleTicks >= 4) advance();
+                             }, 250);
+                         }
+                         // If onstart never arrives either, the utterance was lost
+                         // outright — move on rather than stopping the reading.
+                         var startGuard = setTimeout(function () {
+                             if (!advanced && rvRunId === LOOMA.speak.runId) advance();
+                         }, 5000);
+
                          responsiveVoice.speak(segment, rvVoice, {
                              rate: rvRate,
                              onstart: function () {
+                                 clearTimeout(startGuard);
                                  if (rvRunId !== LOOMA.speak.runId) return;
+                                 startWatchdog();
                                  if (index === 0) {
                                      try {
                                          if (window.LOOMA && LOOMA.otel && LOOMA.otel.emitSpan) {
@@ -2233,6 +2282,9 @@ LOOMA.speak = function(text, engine, voice, rate) {
                                  LOOMA.speak.highlightBlock(segment);
                              },
                              onerror: function (ev) {
+                                 clearTimeout(startGuard);
+                                 advanced = true;   // an errored segment must not be retried by the watchdog
+                                 stopWatchdog();
                                  if (rvRunId !== LOOMA.speak.runId) return;
                                  var msg = String((ev && (ev.error || ev.message)) || 'responsivevoice error');
                                  try {
@@ -2252,8 +2304,8 @@ LOOMA.speak = function(text, engine, voice, rate) {
                                  LOOMA.speak.disable();
                              },
                              onend: function () {
-                                 if (rvRunId !== LOOMA.speak.runId) return;
-                                 speakNextRvSegment(index + 1);
+                                 clearTimeout(startGuard);
+                                 advance();
                              }
                          });
                      }
@@ -2580,10 +2632,35 @@ LOOMA.speak = function(text, engine, voice, rate) {
  * that arrive while it is still downloading are queued and resolved together. */
 LOOMA.speak.ensureResponsiveVoice = function (cb) {
     function ready() {
-        return typeof responsiveVoice !== 'undefined' && responsiveVoice &&
-               typeof responsiveVoice.speak === 'function';
+        if (!(typeof responsiveVoice !== 'undefined' && responsiveVoice &&
+              typeof responsiveVoice.speak === 'function')) return false;
+        return true;
     }
-    if (ready()) { cb(true); return; }
+
+    // Chrome populates speechSynthesis.getVoices() asynchronously. An utterance
+    // spoken while that list is still empty does play, but its onend never
+    // fires — which is exactly why the FIRST reading of a session stopped after
+    // one sentence while every later one was fine. So hold the first speak()
+    // until the voice list exists. Browsers where the list never populates (RV
+    // then serves its own cloud audio) must NOT be punished for it, so this is a
+    // best-effort wait, not a requirement: see waitForVoices() below.
+    function voicesReady() {
+        try {
+            if (typeof speechSynthesis === 'undefined' || !speechSynthesis ||
+                typeof speechSynthesis.getVoices !== 'function') return true;
+            var voices = speechSynthesis.getVoices();
+            return !!(voices && voices.length);
+        } catch (e) { return true; }
+    }
+
+    // Poll up to ~2s for the voice list, then continue regardless.
+    function waitForVoices(done) {
+        var tries = 0;
+        (function poll() {
+            if (voicesReady() || ++tries > 20) { done(); return; }
+            setTimeout(poll, 100);
+        })();
+    }
 
     LOOMA.speak.rvWaiters = LOOMA.speak.rvWaiters || [];
     LOOMA.speak.rvWaiters.push(cb);
@@ -2596,6 +2673,10 @@ LOOMA.speak.ensureResponsiveVoice = function (cb) {
         LOOMA.speak.rvWaiters = [];
         waiters.forEach(function (fn) { try { fn(ok); } catch (e) {} });
     }
+
+    // The RV script is already loaded and only the voice list is missing —
+    // don't re-inject it, just wait for the voices.
+    if (ready()) { waitForVoices(function () { settle(true); }); return; }
 
     var src = window.LOOMA_RESPONSIVEVOICE_SRC ||
               'https://code.responsivevoice.org/responsivevoice.js?key=r2w8pU3y';
@@ -2617,7 +2698,7 @@ LOOMA.speak.ensureResponsiveVoice = function (cb) {
         // ceiling) until responsiveVoice.speak is callable.
         var tries = 0;
         (function waitReady() {
-            if (ready()) { settle(true); return; }
+            if (ready()) { waitForVoices(function () { settle(true); }); return; }
             if (++tries > 40) { settle(false); return; }
             setTimeout(waitReady, 100);
         })();

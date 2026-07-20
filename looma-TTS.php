@@ -57,6 +57,17 @@ $ttsRequest = [
     "language" => $language,
 ];
 
+// Reading speed. The frontend sends a Looma "rate" (rate > 1 is faster); the
+// Piper server converts it to a length_scale. This used to be read only for the
+// trace attributes above and never forwarded, so the speed chosen on the
+// Reading Settings page had no effect on Piper at all.
+if (isset($_REQUEST["rate"]) && is_numeric($_REQUEST["rate"])) {
+    $rate = (float) $_REQUEST["rate"];
+    if ($rate > 0 && $rate <= 2) {
+        $ttsRequest["rate"] = $rate;
+    }
+}
+
 // An explicit Piper voice model (sent by the TTS test page) overrides the
 // server's language-based default. Only forward a safe model filename.
 $requestedVoice = isset($_REQUEST["voice"]) ? trim((string) $_REQUEST["voice"]) : "";
