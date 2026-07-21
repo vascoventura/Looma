@@ -28,7 +28,7 @@ function ttsRateSelect($id) {
 ?>
 
 <link rel="stylesheet" href="css/looma.css">
-<link rel="stylesheet" href="css/looma-test-speech.css?v=20260615-looma">
+<link rel="stylesheet" href="css/looma-test-speech.css?v=<?php echo @filemtime('css/looma-test-speech.css') ?: time(); ?>">
 
 </head>
 
@@ -108,11 +108,14 @@ function ttsRateSelect($id) {
                     <input type="checkbox" class="tts-default" id="responsivevoice-default" data-engine="responsivevoice">
                     <span>Default for reading text selections</span>
                 </label>
+                <!-- Filled in by looma-test-speech.js when ResponsiveVoice cannot
+                     be reached, so the disabled controls explain themselves. -->
+                <p id="responsivevoice-unavailable-note" class="tts-unavailable-note"></p>
             </div>
 
             <!-- Mimic and Browser Speech (speechSynthesis) were removed. The two
-                 remaining engines are Piper (local/offline) and ResponsiveVoice
-                 (cloud — needs internet). -->
+                 remaining engines are Piper (local/offline — always the default)
+                 and ResponsiveVoice (cloud — selectable only with internet). -->
 
         </div>
 
@@ -121,7 +124,7 @@ function ttsRateSelect($id) {
     <?php include ('includes/toolbar.php'); ?>
     <?php include ('includes/js-includes.php'); ?>
 
-    <script src="js/looma-test-speech.js?v=20260711-piper-rv"></script>
+    <script src="js/looma-test-speech.js?v=<?php echo @filemtime('js/looma-test-speech.js') ?: time(); ?>"></script>
 
 </body>
 

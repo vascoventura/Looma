@@ -45,5 +45,7 @@ echo '<div id="pdf" class="scroll"'  .
 ?>
 
 <script src="js/pdfjs/pdf.min.js"></script>
-<script src="js/looma-pdf-utilities.js"></script>
-<script src="js/looma-play-pdf.js"></script>
+<!-- ?v=filemtime, as in includes/js-includes.php: without it a box that already
+     has these cached keeps serving the old copy after an update. -->
+<script src="js/looma-pdf-utilities.js?v=<?php echo @filemtime('js/looma-pdf-utilities.js') ?: time(); ?>"></script>
+<script src="js/looma-play-pdf.js?v=<?php echo @filemtime('js/looma-play-pdf.js') ?: time(); ?>"></script>

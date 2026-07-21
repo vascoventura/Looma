@@ -70,10 +70,52 @@ $(document).ready(function () {
             exercises the exact same path (and telemetry) as the rest of Looma.
             The voice is passed as { en, np }; LOOMA.speak picks the right one
             per sentence from the detected language. ---- */
+
+    /* ---- "waiting for the engine" spinner ----
+       LOOMA.speak's own pending/busy visuals only reach the floating `button.speak`
+       control, which this page does not have — so pressing an engine button used to
+       do nothing visible until audio came out. That gap is seconds long for
+       ResponsiveVoice, which has to fetch its script from responsivevoice.org and
+       then wait on the cloud, and a teacher with no feedback just presses again.
+       The spinner runs from the click until the first audio (or the failure). */
+    var $pendingButton = null;
+    var sawPending = false;
+    var spinnerTimeout = null;
+
+    function clearSpinner() {
+        if ($pendingButton) $pendingButton.removeClass('tts-engine-pending');
+        $pendingButton = null;
+        sawPending = false;
+        if (spinnerTimeout) { clearTimeout(spinnerTimeout); spinnerTimeout = null; }
+    }
+
+    function showSpinnerOn($button) {
+        clearSpinner();
+        $pendingButton = $button;
+        $pendingButton.addClass('tts-engine-pending');
+        // A run that never reaches the pending state at all (empty phrase, an engine
+        // that bails out early) would otherwise leave the spinner turning for good.
+        spinnerTimeout = setTimeout(clearSpinner, 15000);
+    }
+
+    if (LOOMA.speak.onStateChange) {
+        LOOMA.speak.onStateChange(function (state) {
+            if (!$pendingButton) return;
+            // LOOMA.speak resets the button state on its way in, so a `pending: false`
+            // arriving before the request is even sent is not the wait being over.
+            // Only stop the spinner once the wait has actually been entered — or once
+            // audio is sounding, which ends it whatever the order of events.
+            if (state.pending) { sawPending = true; return; }
+            if (sawPending || state.busy) clearSpinner();
+        });
+    }
+
     $('#piper').click(function () {
+        showSpinnerOn($(this));
         LOOMA.speak(phrase(), 'piper', { en: voices.piper.en, np: voices.piper.np }, rateObj('piper'));
     });
     $('#responsivevoice').click(function () {
+        showSpinnerOn($(this));
         LOOMA.speak(phrase(), 'responsivevoice', { en: voices.responsivevoice.en, np: voices.responsivevoice.np }, rateObj('responsivevoice'));
     });
 
@@ -159,6 +201,50 @@ $(document).ready(function () {
         }
     });
 
+    /* ---- ResponsiveVoice availability gate ----
+       ResponsiveVoice is a CLOUD engine: it cannot work without internet. So it
+       can only be picked here when the box is actually able to reach it. Piper
+       is the default and is always available (local/offline).
+
+       navigator.onLine alone is not enough — it reports true for a box on a LAN
+       with no route to the internet, which is a common Looma deployment. So an
+       offline flag is treated as definitive (no probe), while an online flag is
+       only a hint that is then CONFIRMED by actually loading the RV script via
+       LOOMA.speak.ensureResponsiveVoice() (cached, so this costs one request per
+       session at most). Until that confirms, RV stays locked. */
+    // The whole ResponsiveVoice column is locked together — the Speak button,
+    // both voice pickers, both speed pickers and the default checkbox. Leaving
+    // some of them live inside a dimmed column would just look broken.
+    var $rvControls = $('#responsivevoice, #responsivevoice-default, ' +
+                        '#' + selectIds.responsivevoice.en + ', #' + selectIds.responsivevoice.np + ', ' +
+                        '#' + rateSelectIds.responsivevoice.en + ', #' + rateSelectIds.responsivevoice.np);
+
+    function setResponsiveVoiceAvailable(available, reason) {
+        $rvControls.prop('disabled', !available);
+        $('#responsivevoice-default').closest('.tts-engine')
+            .toggleClass('tts-engine-unavailable', !available);
+        $('#responsivevoice-unavailable-note').text(available ? '' : reason || '');
+    }
+
+    function refreshResponsiveVoiceAvailability() {
+        if (!navigator.onLine) {
+            setResponsiveVoiceAvailable(false, 'Needs internet — not connected.');
+            return;
+        }
+        setResponsiveVoiceAvailable(false, 'Checking internet connection…');
+        try {
+            LOOMA.speak.ensureResponsiveVoice(function (ok) {
+                setResponsiveVoiceAvailable(ok, ok ? '' : 'Cannot reach ResponsiveVoice — no internet.');
+            });
+        } catch (e) {
+            setResponsiveVoiceAvailable(false, 'Cannot reach ResponsiveVoice — no internet.');
+        }
+    }
+
+    // Re-check when the box gains or loses its connection, so the teacher does
+    // not have to reload the page after plugging in the network.
+    $(window).on('online offline', refreshResponsiveVoiceAvailability);
+
     /* ---- restore the saved settings when the page opens ---- */
     function restoreSavedSettings() {
         var legacyRate = LOOMA.readStore('tts-rate', 'cookie');
@@ -197,5 +283,6 @@ $(document).ready(function () {
     }
 
     restoreSavedSettings();
+    refreshResponsiveVoiceAvailability();
 
 }); //end document.ready function

@@ -17,6 +17,13 @@
     gap: 3.4vh;
     padding: 4vh 4vw 6vh;
     box-sizing: border-box;
+
+    /* Row heights shared by every engine column. Because each column lays its
+       controls out on these SAME explicit tracks, matching controls always land
+       on the same line across the columns — see .tts-engine. */
+    --tts-voice-row:   calc(1.6em + 46px);   /* caption + 40px dropdown */
+    --tts-rate-row:    calc(1.4em + 42px);   /* caption + 36px dropdown */
+    --tts-default-row: 3.4em;                /* checkbox + up to two lines of label */
 }
 
 /* page heading */
@@ -73,26 +80,74 @@
     width: 100%;
 }
 
-/* each engine column: Speak button, English voice, Nepali voice and the
-   default checkbox stacked vertically with even spacing */
+/* each engine column: Speak button, English voice + speed, Nepali voice + speed,
+   and the default checkbox, on six shared row tracks */
 .tts-engine {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
+    /* A grid on EXPLICIT row tracks, not a flex column whose rows size themselves
+       to their own content. Both columns hold the same six controls in the same
+       order, so pinning the track heights is what guarantees that the Speak
+       buttons, the voice pickers, the speed pickers and — the one that kept
+       drifting out of line — the "Default for reading text selections" checkboxes
+       sit at the same height across the two engines, whatever the labels do. */
+    display: grid;
+    grid-template-rows:
+        auto                      /* Speak button (its own height is fixed) */
+        var(--tts-voice-row)      /* English voice    */
+        var(--tts-rate-row)       /* English speed    */
+        var(--tts-voice-row)      /* Nepali voice     */
+        var(--tts-rate-row)       /* Nepali speed     */
+        var(--tts-default-row);   /* default checkbox */
+    align-content: start;
     gap: 14px;
     flex: 1 1 300px;
     max-width: 430px;
+    /* Reserve the unavailable-note strip in EVERY column and position the note
+       inside it (below), so the note — which only exists in the ResponsiveVoice
+       column, and keeps a min-height even while empty — never takes part in the
+       layout and cannot push that column's controls around. */
+    position: relative;
+    padding-bottom: 1.7em;
 }
 
 /* Speak button — fixed height so the voice fields below start at the same
    line in every column, whatever the button label length. */
 .tts-engine-button {
+    position: relative;         /* anchors the waiting spinner below */
     width: 100%;
     height: 11vh;
     min-height: 84px;
     font-size: 1.3em;
     padding: 10px 16px;
     cursor: pointer;
+}
+
+/* Turning circle, shown from the moment the button is pressed until the first
+   audio comes out. ResponsiveVoice is a cloud engine — it has to fetch its
+   script from responsivevoice.org and then wait on the network — so without
+   this the button sat looking dead for several seconds and invited a second
+   press. Set and cleared by looma-test-speech.js via LOOMA.speak.onStateChange().
+   The keyframes (ttsPendingSpin) live in looma.css, next to the matching spinner
+   on the floating Speak control. */
+.tts-engine-button.tts-engine-pending {
+    color: transparent;         /* the label would sit under the spinner */
+    cursor: progress;
+}
+
+.tts-engine-button.tts-engine-pending::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 2.2em;
+    height: 2.2em;
+    margin: -1.1em 0 0 -1.1em;
+    box-sizing: border-box;
+    border-radius: 50%;
+    border: 0.28em solid rgba(0, 0, 0, 0.18);
+    border-top-color: #1565d8;
+    border-right-color: rgba(21, 101, 216, 0.75);
+    animation: ttsPendingSpin 0.8s linear infinite;
+    pointer-events: none;
 }
 
 /* a labelled voice selector: yellow caption above a full-width dropdown */
@@ -102,6 +157,15 @@
     align-items: stretch;
     gap: 6px;
     width: 100%;
+}
+
+/* Captions stay on one line. A caption that wrapped in one column but not the
+   other used to push everything below it down and break the alignment. */
+.tts-voice-field label,
+.tts-rate-field label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .tts-voice-field label {
@@ -152,16 +216,18 @@
 }
 
 /* "Default for reading text selections" checkbox — picks the TTS technology
-   LOOMA.speak() uses when reading a text selection. Pushed to the bottom so
-   the checkbox aligns across columns even if a label wraps. Large checkbox
-   and clear text so it stays legible on classroom projectors. */
+   LOOMA.speak() uses when reading a text selection. It sits on the last of
+   .tts-engine's shared row tracks, which is what keeps the two checkboxes on the
+   same line; no `margin-top: auto` any more, since that pushed each one to the
+   bottom of its OWN column and so lined them up only when the columns happened
+   to be the same height. Large checkbox and clear text so it stays legible on
+   classroom projectors. */
 .tts-default-label {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 12px;
     width: 100%;
-    margin-top: auto;
     padding-top: 6px;
     font-size: 1.15em;
     line-height: 1.3;
@@ -177,4 +243,38 @@
     margin: 0;
     cursor: pointer;
     accent-color: #1565d8;
+}
+
+/* ResponsiveVoice is a cloud engine, so it is locked whenever the box cannot
+   reach the internet. Dim the whole column (not just the disabled controls) so
+   it is obvious at a glance that the engine is unavailable rather than broken.
+   Piper, being local, is never dimmed. */
+.tts-engine-unavailable .tts-engine-button,
+.tts-engine-unavailable .tts-voice-field,
+.tts-engine-unavailable .tts-rate-field,
+.tts-engine-unavailable .tts-default-label {
+    opacity: 0.45;
+}
+
+.tts-engine-unavailable .tts-engine-button,
+.tts-engine-unavailable .tts-default-label,
+.tts-engine-unavailable .tts-default {
+    cursor: not-allowed;
+}
+
+/* Explains WHY the column is locked; empty (and so invisible) when available.
+   Sits in the strip reserved by .tts-engine's padding-bottom and is taken OUT of
+   the flow, so it can never shift the default checkbox above it — the checkboxes
+   stay aligned across columns whether or not this note has text. */
+.tts-unavailable-note {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: 0;
+    min-height: 1.2em;
+    font-size: 0.95em;
+    line-height: 1.2;
+    text-align: center;
+    color: var(--looma-font-color);   /* Looma yellow */
 }

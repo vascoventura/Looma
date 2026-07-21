@@ -15,22 +15,119 @@ $(window).resize(async function() {
     await drawMultiplePages(pdfdoc, startPage, endPage).promise;
 });
 
+/**
+ * The element of the pdf.js text layer that a node belongs to — i.e. the direct
+ * child of a `.pdf-text` container. Walks up past anything wrapped around the
+ * text since it was rendered (the reading highlight wraps spans of its own).
+ * Returns null for nodes outside a text layer.
+ */
+function pdfTextItem(node) {
+    var el = (node && node.nodeType === 3) ? node.parentNode : node;
+    while (el && el.nodeType === 1) {
+        var parent = el.parentNode;
+        if (parent && parent.classList && parent.classList.contains("pdf-text")) return el;
+        el = parent;
+    }
+    return null;
+}
+
+/**
+ * Rebuild the selected text in the order the words actually appear on the page.
+ *
+ * A pdf.js text layer is a pile of absolutely positioned spans, and their DOM
+ * order is the PDF's content-stream order — NOT the order a reader sees. Taking
+ * the selection as a flat string therefore drags in every span that merely falls
+ * between the two ends in DOM order, wherever it happens to sit on the page: the
+ * page number, the running header, a figure label. Since long words are split
+ * across several spans ("fin" + "e"), one of those strays lands *inside* a word
+ * and "some" comes out as "so1me".
+ *
+ * So: take the spans the selection touches, sort them into reading order (by
+ * line, then left to right), and keep only the ones between the two ends of the
+ * selection in THAT order. A page number above the selected line now sorts
+ * outside the window and is dropped instead of being spliced into a word.
+ *
+ * Returns "" when the selection is not in a text layer, so the caller can fall
+ * back to the plain selection string.
+ */
+function getPdfSelectionItems(range) {
+    var startItem = pdfTextItem(range.startContainer);
+    var endItem = pdfTextItem(range.endContainer);
+    if (!startItem || !endItem) return [];
+
+    var items = [];
+    $("#pdf .pdf-text").each(function () {
+        var children = this.children;
+        for (var i = 0; i < children.length; i++) {
+            var el = children[i];
+            if (!range.intersectsNode(el)) continue;
+            var rect = el.getBoundingClientRect();
+            items.push({el: el, top: rect.top, left: rect.left, height: rect.height});
+        }
+    });
+    if (!items.length) return [];
+
+    // Group into lines before sorting left-to-right: spans on one line never share
+    // an exact `top`, so a tolerance of half a line is what separates "next word"
+    // from "next line".
+    items.sort(function (a, b) { return (a.top - b.top) || (a.left - b.left); });
+    var tolerance = Math.max(4, (items[0].height || 12) * 0.6);
+    var line = 0;
+    var lineTop = items[0].top;
+    items.forEach(function (item) {
+        if (item.top - lineTop > tolerance) { line++; lineTop = item.top; }
+        item.line = line;
+    });
+    items.sort(function (a, b) { return (a.line - b.line) || (a.left - b.left); });
+
+    var startAt = -1, endAt = -1;
+    items.forEach(function (item, index) {
+        if (item.el === startItem) startAt = index;
+        if (item.el === endItem) endAt = index;
+    });
+    if (startAt === -1 || endAt === -1) return [];
+
+    return items.slice(Math.min(startAt, endAt), Math.max(startAt, endAt) + 1);
+}
+
 function getPdfSelectionText() {
     var selection = window.getSelection();
     if (!selection || selection.rangeCount === 0) return "";
 
     var range = selection.getRangeAt(0);
-    var fragment = range.cloneContents();
-    var container = document.createElement("div");
-    container.appendChild(fragment);
+    var items = getPdfSelectionItems(range);
+    var text;
 
-    // PDF.js splits text into many spans, so cloned HTML preserves word breaks for TTS better than a raw selection string.
-    var text = container.innerText || container.textContent || selection.toString() || "";
+    if (items.length) {
+        // The two end spans are only partly selected, so clip them to the part the
+        // user actually dragged over. pdf.js already carries the spaces between
+        // words in the span text itself (and splits words with no space at all), so
+        // the pieces are joined with nothing added and the whitespace collapsed after.
+        text = items.map(function (item) {
+            var el = item.el;
+            var holdsStart = el.contains(range.startContainer);
+            var holdsEnd = el.contains(range.endContainer);
+            if (!holdsStart && !holdsEnd) return el.textContent || "";
 
-    return text
-        .replace(/\|/g, " ")
-        .replace(/\s+/g, " ")
-        .trim();
+            try {
+                var clipped = el.ownerDocument.createRange();
+                clipped.selectNodeContents(el);
+                if (holdsStart) clipped.setStart(range.startContainer, range.startOffset);
+                if (holdsEnd) clipped.setEnd(range.endContainer, range.endOffset);
+                return clipped.toString();
+            } catch (e) {
+                return el.textContent || "";
+            }
+        }).join("");
+    } else {
+        // Not a text-layer selection (a caption, the toolbar, a lesson iframe …).
+        var container = document.createElement("div");
+        container.appendChild(range.cloneContents());
+        text = container.innerText || container.textContent || selection.toString() || "";
+    }
+
+    // Safety net for anything the reading-order pass still let through.
+    return LOOMA.cleanSelectedText(text);
 }
 
 window.onload = function() {
